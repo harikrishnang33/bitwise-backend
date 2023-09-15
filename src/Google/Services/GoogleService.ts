@@ -193,11 +193,11 @@ export class GoogleService {
     // return result;
   }
 
-  public async updateGoogleDoc(googleId: string, text: string, userId: string) {
+  public async updateGoogleDoc(id: string, text: string, userId: string) {
     const doc = await this.dataSource
       .getRepository(GoogleDoc)
       .createQueryBuilder()
-      .where({ googleId })
+      .where({ id })
       .getOne();
     if (isEmpty(doc)) {
       throw new Error('Doc does not exist');
@@ -225,7 +225,7 @@ export class GoogleService {
     }
 
     const result = await this.docs.documents.batchUpdate({
-      documentId: googleId,
+      documentId: doc.googleId,
       requestBody: {
         requests: [
           {

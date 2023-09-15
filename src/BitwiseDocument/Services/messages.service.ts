@@ -60,7 +60,7 @@ export class MessagesService {
     );
   }
 
-  public async upsert(id: string, updateMessageDto: UpdateMessageDto) {
+  public async upsert(id: string, updateMessageDto: UpdateMessageDto, userId: string) {
     const document: Message = plainToClass(Message, {
       id: id ? id : v4(),
       message: updateMessageDto.message,
@@ -83,8 +83,7 @@ export class MessagesService {
       id,
     );
     if (isGoogleDoc) {
-      // return await this.googleService.updateGoogleDoc();
-      // this.convertHtmlToBodyElements(document.message);
+      return this.googleService.updateGoogleDoc(id, updateMessageDto.message, userId);
     }
 
     const linkedDestinationDocuments = await this.dataSource

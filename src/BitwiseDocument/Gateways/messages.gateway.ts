@@ -27,6 +27,7 @@ export class MessagesGateway {
     const updatedMessage = await this.messagesService.upsert(
       updateMessageDtoObject.id,
       updateMessageDtoObject,
+      client.id,
     );
     client.broadcast.emit('messageUpdated', JSON.stringify(updatedMessage));
     return updatedMessage;
