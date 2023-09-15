@@ -3,6 +3,7 @@ import { DataSource, DeepPartial, EntityManager, In } from 'typeorm';
 import { v4 } from 'uuid';
 import { User } from '../Entities/User';
 import { Credentials } from 'google-auth-library';
+import { UserInput } from '../Models/UserInputModel';
 
 @Injectable()
 export class UserService {
@@ -10,7 +11,7 @@ export class UserService {
 
   constructor(private readonly dataSource: DataSource) {}
 
-  async create(userEntity: User) {
+  async create(userEntity: UserInput) {
     return await this.dataSource.getRepository(User).save(userEntity);
   }
 
