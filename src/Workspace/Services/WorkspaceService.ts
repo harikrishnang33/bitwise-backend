@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, IsNull } from 'typeorm';
 import { CreateWorkspaceDto } from '../Dto/CreateWorkspaceDto';
 import { plainToClass } from 'class-transformer';
 import { Workspace } from '../Entities/Workspace';
@@ -51,6 +51,12 @@ export class WorkspaceService {
   }
 
   async getAllWorkspace() {
-    return this.dataSource.getRepository(Workspace).findAndCount();
+    return this.dataSource
+      .getRepository(Workspace)
+      .findAndCount({
+        where: { deletedAt: null },
+        relations: ['admin'],
+        order: { createdAt: 'DESC' },
+      });
   }
 }

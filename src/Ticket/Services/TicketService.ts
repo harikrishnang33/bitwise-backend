@@ -4,6 +4,7 @@ import { CreateTicketDto } from '../Dto/CreateTicket.dto';
 import { Ticket } from '../Entities/Ticket';
 import { v4 } from 'uuid';
 import { TicketStatus } from '../Enums/TicketStatusEnum';
+import { User } from '../../User/Entities/User';
 
 @Injectable()
 export class TicketService {
@@ -11,11 +12,11 @@ export class TicketService {
 
   constructor(private readonly dataSource: DataSource) {}
 
-  async createTicket(input: CreateTicketDto): Promise<Ticket> {
+  async createTicket(input: CreateTicketDto, user: User): Promise<Ticket> {
     const ticket: DeepPartial<Ticket> = {
       id: v4(),
       title: input.title,
-      createdById: input.createdBy,
+      createdById: user.id,
       status: TicketStatus.OPEN,
       description: input.description,
       workspaceId: input.workspaceId,
@@ -23,8 +24,10 @@ export class TicketService {
     return this.dataSource.getRepository(Ticket).save(ticket);
   }
 
-  async getAllTickets(): Promise<Ticket[]> {
-    return this.dataSource.getRepository(Ticket).find();
+  async getAllTickets(workspaceId: string): Promise<Ticket[]> {
+    return this.dataSource
+      .getRepository(Ticket)
+      .find({ where: { workspaceId } });
   }
 
   async getTicketById(id: string): Promise<Ticket> {
