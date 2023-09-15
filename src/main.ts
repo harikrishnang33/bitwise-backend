@@ -6,7 +6,7 @@ import {
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './appModule';
 import { ApplicationExceptionFilter } from './Common/Exception/applicationExceptionFilter';
-import { AuthMiddleware } from './Auth/Guards/AuthMiddleware';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,7 +21,7 @@ async function bootstrap() {
       },
     }),
   );
-  // app.use(new AuthMiddleware())
+  app.use(cookieParser());
   await app.listen(process.env.PORT || 3000);
   // eslint-disable-next-line no-console
   console.log(`Application is running on: ${await app.getUrl()}`);

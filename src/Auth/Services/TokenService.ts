@@ -38,4 +38,12 @@ export default class TokenService {
       { expiresIn: Number(expiryInSec) },
     );
   }
+
+  verifyToken(token: string) {
+    try{
+      return jwt.verify(token, this.configService.get<string>('JWT_SECRET'));
+    } catch (error) {
+      return null;
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { formatResponse } from 'src/Common/Utils/formatResponse';
 import { CreateWorkspaceDto } from '../Dto/CreateWorkspaceDto';
 import { WorkspaceService } from '../Services/WorkspaceService';
@@ -9,14 +9,15 @@ export class WorkspaceController {
   constructor(private readonly workspaceService: WorkspaceService) {}
 
   @Post()
-  async create(@Body() workspaceInput: CreateWorkspaceDto) {
-    const result = await this.workspaceService.create(workspaceInput);
+  @UseGuards(AuthGuard)
+  async create(@Body() workspaceInput: CreateWorkspaceDto, @Req() request: any) {
+    const result = await this.workspaceService.create(workspaceInput, request.user);
     return formatResponse(result, 'Workspace created successfully');
   }
 
   @Get()
-  @AuthGuard()
-  async getAll() {
+  @UseGuards(AuthGuard)
+  async getAll(@Req() request: any) {
     const result = await this.workspaceService.getAllWorkspace();
     return formatResponse(result, 'Workspaces fetched successfully');
   }
