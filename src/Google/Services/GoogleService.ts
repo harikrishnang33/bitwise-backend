@@ -4,6 +4,7 @@ import { CreateDocDto } from '../Dtos/CreateDoc.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { UserService } from '../../User/Services/UserService';
 import TokenService from '../../Auth/Services/TokenService';
+import { User } from '../../User/Entities/User';
 
 // Load the credentials JSON file you downloaded
 const credentials = JSON.parse(
@@ -71,11 +72,19 @@ export class GoogleService {
         name: userInfo.email,
       });
     }
+    this.updateUserIfInfoChanged(user, userInfo);
 
     return this.tokenService.generateAccessAndRefreshTokens(user.id);
 
     // Set the credentials for the OAuth2 client
     this.oauth2Client.setCredentials(tokens);
+  }
+
+  updateUserIfInfoChanged(user: User, gTokenPayload: any) {
+    if (user.name != gTokenPayload.name) {
+      user.name = gTokenPayload.name;
+      this.userService.updateUser(user);
+    }
   }
 
   public async createDoc(input: CreateDocDto) {

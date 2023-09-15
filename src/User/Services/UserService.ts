@@ -49,4 +49,8 @@ export class UserService {
         .find({ where: { email: In(emailIds) } }),
     );
   }
+
+  async updateUser(user: User) {
+    return this.dataSource.getRepository(User).save(user);
+  }
 }
