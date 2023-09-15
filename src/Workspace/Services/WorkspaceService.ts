@@ -4,6 +4,7 @@ import { CreateWorkspaceDto } from '../Dto/CreateWorkspaceDto';
 import { plainToClass } from 'class-transformer';
 import { Workspace } from '../Entities/Workspace';
 import EntityAlreadyExistError from '../../Common/Exception/EntityAlreadyExistError';
+import { User } from '../../User/Entities/User';
 
 @Injectable()
 export class WorkspaceService {
@@ -11,10 +12,10 @@ export class WorkspaceService {
 
   constructor(private readonly dataSource: DataSource) {}
 
-  async create(workspaceDto: CreateWorkspaceDto) {
+  async create(workspaceDto: CreateWorkspaceDto, user: User) {
     const workspace: Workspace = plainToClass(Workspace, {
       ...workspaceDto,
-      adminUserId: '54087a6f-b78a-4e97-a6a7-70f0db52d799',
+      adminUserId: user.id,
     });
 
     try {

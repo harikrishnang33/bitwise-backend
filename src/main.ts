@@ -6,10 +6,18 @@ import {
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './appModule';
 import { ApplicationExceptionFilter } from './Common/Exception/applicationExceptionFilter';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  const options = {
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    credentials: true,
+    allowedHeaders: 'Content-Type, Accept',
+  };
+  app.enableCors(options);
   app.useGlobalFilters(new ApplicationExceptionFilter());
   app.setGlobalPrefix('api', { exclude: ['health'] });
   app.useGlobalPipes(
@@ -20,7 +28,7 @@ async function bootstrap() {
       },
     }),
   );
-
+  app.use(cookieParser());
   await app.listen(process.env.PORT || 3000);
   // eslint-disable-next-line no-console
   console.log(`Application is running on: ${await app.getUrl()}`);

@@ -37,4 +37,8 @@ export class UserService {
   async getUserById(userId: string) {
     return this.dataSource.getRepository(User).findOneBy({ id: userId });
   }
+
+  async getUserByEmail(email: string) {
+    return this.dataSource.getRepository(User).findOneBy({ email });
+  }
 }

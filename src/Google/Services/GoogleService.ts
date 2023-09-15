@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { docs_v1, google } from 'googleapis';
-import { OAuth2Client } from 'google-auth-library';
 import { CreateDocDto } from '../Dtos/CreateDoc.dto';
+import { OAuth2Client } from 'google-auth-library';
+import { UserService } from '../../User/Services/UserService';
+import TokenService from '../../Auth/Services/TokenService';
 
 // Load the credentials JSON file you downloaded
 const credentials = JSON.parse(
@@ -10,9 +12,13 @@ const credentials = JSON.parse(
 
 @Injectable()
 export class GoogleService {
+  private logger: Logger = new Logger(GoogleService.name);
   private docs: docs_v1.Docs; // Google Docs API client
   private oauth2Client: OAuth2Client;
-  constructor() {
+  constructor(
+    private readonly userService: UserService,
+    private tokenService: TokenService,
+  ) {
     // Create an OAuth2 client
     this.oauth2Client = new google.auth.OAuth2({
       clientId: credentials.web.client_id,
@@ -25,7 +31,11 @@ export class GoogleService {
 
   public async initiateAuthentication() {
     // Access scopes for read-only Drive activity.
-    const scopes = ['https://www.googleapis.com/auth/drive'];
+    const scopes = [
+      'https://www.googleapis.com/auth/drive',
+      'https://www.googleapis.com/auth/userinfo.email',
+      'https://www.googleapis.com/auth/userinfo.profile',
+    ];
 
     // Generate a url that asks permissions for the Drive activity scope
     const authorizationUrl = this.oauth2Client.generateAuthUrl({
@@ -46,6 +56,23 @@ export class GoogleService {
     // This will provide an object with the access_token and refresh_token.
     // Save these somewhere safe so they can be used at a later time.
     const { tokens } = await this.oauth2Client.getToken(authCode);
+
+    const tokendata = await this.oauth2Client.verifyIdToken({
+      idToken: tokens.id_token,
+    });
+    const userInfo = tokendata.getPayload();
+
+    let user = await this.userService.getUserByEmail(userInfo.email);
+
+    if (!user) {
+      this.logger.log(`User with email: ${userInfo.email} doesn't exist`);
+      user = await this.userService.create({
+        email: userInfo.email,
+        name: userInfo.email,
+      });
+    }
+
+    return this.tokenService.generateAccessAndRefreshTokens(user.id);
 
     // Set the credentials for the OAuth2 client
     this.oauth2Client.setCredentials(tokens);

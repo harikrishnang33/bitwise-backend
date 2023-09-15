@@ -12,10 +12,12 @@ import { Request, Response } from 'express';
 import { formatResponse } from 'src/Common/Utils/formatResponse';
 import { GoogleService } from '../Services/GoogleService';
 import { CreateDocDto } from '../Dtos/CreateDoc.dto';
+import { ConfigService } from '../../Common/Config/configService';
 
 @Controller('google')
 export class GoogleController {
-  constructor(private readonly googleService: GoogleService) {}
+  constructor(private readonly googleService: GoogleService,
+    private readonly configService: ConfigService) {}
 
   @Post('create')
   async create(
@@ -47,6 +49,11 @@ export class GoogleController {
     const authCode = queryParams.code;
     const result = await this.googleService.authenticate(authCode);
     const response = formatResponse(result, 'Authenticated successfully');
-    return res.status(response.statusCode).send(response);
+    res.cookie('accessToken', result.accessToken);
+    res.cookie('refreshToken', result.refreshToken);
+    const redirectUrl = `${this.configService.get(
+      `FE_BASE_URL`,
+    )}/${this.configService.get(`FE_SUCCESS_PATH`)}`;
+    res.redirect(redirectUrl);
   }
 }
