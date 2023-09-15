@@ -62,11 +62,27 @@ export class WorkspaceService {
   }
 
   async getAllWorkspace() {
-    return this.dataSource.getRepository(Workspace).findAndCount({
-      where: { deletedAt: null },
-      relations: ['admin'],
-      order: { createdAt: 'DESC' },
-    });
+    const workspaces = await this.dataSource
+      .getRepository(Workspace)
+      .findAndCount({
+        where: { deletedAt: null },
+        relations: ['admin'],
+        order: { createdAt: 'DESC' },
+      });
+
+    const workspaceModel = await Promise.all(
+      workspaces[0].map(async (workspace) => {
+        const users = await this.workspaceUsersService.workspaceUsers(
+          workspace.id,
+        );
+        return {
+          workspace,
+          users,
+        };
+      }),
+    );
+
+    return workspaceModel;
   }
 
   async getAllByWorkspaceId(workspaceId: string) {
