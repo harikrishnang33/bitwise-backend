@@ -72,6 +72,7 @@ export class GoogleService {
 
   public async authenticate(authCode: string) {
     const { tokens } = await this.oauth2Client.getToken(authCode); // the oauth2Client credentials will then be set by the "this.oauth2Client.on('tokens', (tokens)" event
+    this.oauth2Client.setCredentials(tokens);
     let newTokens: Credentials;
     if (this.isAccessTokenExpired()) {
       newTokens = await this.setNewAccessToken(tokens);
