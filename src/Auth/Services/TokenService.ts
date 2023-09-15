@@ -40,7 +40,7 @@ export default class TokenService {
   }
 
   verifyToken(token: string) {
-    try{
+    try {
       return jwt.verify(token, this.configService.get<string>('JWT_SECRET'));
     } catch (error) {
       return null;

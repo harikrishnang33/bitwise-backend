@@ -16,8 +16,10 @@ import { ConfigService } from '../../Common/Config/configService';
 
 @Controller('google')
 export class GoogleController {
-  constructor(private readonly googleService: GoogleService,
-    private readonly configService: ConfigService) {}
+  constructor(
+    private readonly googleService: GoogleService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post('create')
   async create(
