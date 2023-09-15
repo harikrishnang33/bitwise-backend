@@ -36,13 +36,13 @@ export class LinkedNodeService {
     return savedLinkedNodes;
   }
 
-  async getLinkedNodes(sourceId: string, workspaceId: string) {
+  async getLinkedNodes(workspaceId: string, sourceId?: string) {
     const linkedNodes = await this.dataSource.transaction(
       async (transactionalEntityManager: EntityManager) => {
         const linkedNodeRepository =
           transactionalEntityManager.getRepository(LinkedNode);
         return linkedNodeRepository.findBy({
-          sourceId,
+          ...(sourceId && { sourceId }),
           workspaceId,
           deletedAt: null,
         });

@@ -5,6 +5,13 @@ import { plainToClass } from 'class-transformer';
 import { Workspace } from '../Entities/Workspace';
 import EntityAlreadyExistError from '../../Common/Exception/EntityAlreadyExistError';
 import { User } from '../../User/Entities/User';
+import { MessagesService } from '../../BitwiseDocument/Services/messages.service';
+import { TicketService } from '../../Ticket/Services/TicketService';
+import { LinkedNodeService } from '../../LinkedNodes/Services/LinkedNodeService';
+import { Message } from '../../BitwiseDocument/Entities/message.entity';
+import { Ticket } from '../../Ticket/Entities/Ticket';
+import { LinkedNode } from '../../LinkedNodes/Entities/LinkedNode';
+import { LinkedNodeType } from '../../LinkedNodes/Enums/LinkedNodeType';
 import { WorkspaceUsersService } from './WorkspaceUsersService';
 
 @Injectable()
@@ -13,6 +20,10 @@ export class WorkspaceService {
 
   constructor(
     private readonly dataSource: DataSource,
+    private readonly messagesService: MessagesService,
+
+    private readonly ticketService: TicketService,
+    private readonly linkedNodeService: LinkedNodeService,
     private readonly workspaceUsersService: WorkspaceUsersService,
   ) {}
 
@@ -56,5 +67,48 @@ export class WorkspaceService {
       relations: ['admin'],
       order: { createdAt: 'DESC' },
     });
+  }
+
+  async getAllByWorkspaceId(workspaceId: string) {
+    const messages = await this.messagesService.findAllByWorkspaceId(
+      workspaceId,
+    );
+    const tickets = await this.ticketService.getAllTickets(workspaceId);
+    // const gDocs = await
+
+    const linkedNodes = await this.linkedNodeService.getLinkedNodes(
+      workspaceId,
+    );
+    return this.buildAllByWorkspaceIdResponse(messages, tickets, linkedNodes);
+  }
+
+  buildAllByWorkspaceIdResponse(
+    messages: Message[],
+    tickets: Ticket[],
+    linkedNodes: LinkedNode[],
+  ) {
+    let nodes: { id: string; name: string; type: LinkedNodeType }[] = [];
+    let links: { source: string; target: string }[] = [];
+    messages.forEach((message) => {
+      nodes.push({
+        id: message.id,
+        name: message.name,
+        type: LinkedNodeType.BITWISE_DOC,
+      });
+    });
+    tickets.forEach((ticket) => {
+      nodes.push({
+        id: ticket.id,
+        name: ticket.title,
+        type: LinkedNodeType.BITWISE_TICKET,
+      });
+    });
+    linkedNodes.forEach((linkedNode) => {
+      links.push({
+        source: linkedNode.sourceId,
+        target: linkedNode.destinationId,
+      });
+    });
+    return { nodes, links };
   }
 }

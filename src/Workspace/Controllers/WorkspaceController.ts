@@ -15,11 +15,11 @@ import { AuthGuard } from '../../Auth/Guards/AuthGuard';
 import { UpdateWorkspaceDto } from '../Dto/UpdateWorksapceDto';
 
 @Controller('workspace')
+@UseGuards(AuthGuard)
 export class WorkspaceController {
   constructor(private readonly workspaceService: WorkspaceService) {}
 
   @Post()
-  @UseGuards(AuthGuard)
   async create(
     @Body() workspaceInput: CreateWorkspaceDto,
     @Req() request: any,
@@ -32,7 +32,6 @@ export class WorkspaceController {
   }
 
   @Patch('/:workspaceId')
-  // @UseGuards(AuthGuard)
   async update(
     @Body() workspaceInput: UpdateWorkspaceDto,
     @Param('workspaceId') workspaceId: string,
@@ -46,9 +45,15 @@ export class WorkspaceController {
   }
 
   @Get()
-  // @UseGuards(AuthGuard)
   async getAll(@Req() request: any) {
     const result = await this.workspaceService.getAllWorkspace();
     return formatResponse(result, 'Workspaces fetched successfully');
+  }
+
+  @Get(`/:id/all`)
+  async getAllByWorkspaceId(@Param('id') workspaceId: string) {
+    return formatResponse(
+      await this.workspaceService.getAllByWorkspaceId(workspaceId),
+    );
   }
 }
