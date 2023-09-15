@@ -68,6 +68,8 @@ export class WorkspaceService {
       .andWhere(`WorkspaceUsers.userId = :userId`, {userId:user.id})
       .leftJoinAndSelect('WorkspaceUsers.workspace', 'workspace')
       .leftJoinAndSelect('workspace.workspaceUsers', 'workspaceUsers')
+      .leftJoinAndSelect('workspaceUsers.user', 'user')
+      .leftJoinAndSelect('workspace.admin', 'admin')
       .orderBy('workspace.createdAt', 'DESC');
 
     return queryBuilder.getManyAndCount();
