@@ -29,6 +29,6 @@ export class User extends AbstractEntity {
   })
   public workspaceUsers!: WorkspaceUsers[];
 
-  @Column({type: 'json'})
+  @Column({ type: 'json' })
   public googleTokenData: Credentials;
 }
