@@ -76,7 +76,7 @@ export class GoogleService {
       const userEntity = plainToClass(User, {
         email: userInfo.email,
         name: userInfo.email,
-        googleTokenData: tokens as GoogleTokenModel, 
+        googleTokenData: tokens as GoogleTokenModel,
       })
       user = await this.userService.create(userEntity);
     }
@@ -89,12 +89,18 @@ export class GoogleService {
 
   public async createDoc(input: CreateDocDto) {
     // Initialize the Google Docs API client
-    if (!this.docs) {
-      this.docs = google.docs({
-        version: 'v1', // Version of the Google Docs API
-        auth: this.oauth2Client,
-      });
+    if (!(this.docs)) {
+      this.instantiateDoc();
     }
+
+    const user = await this.userService.getUserById('8bfe4260-f4d4-403a-b6cf-d524d2fb6eed');
+
+    if (!(user.googleTokenData)) {
+      throw new Error('User does not have google tokens');
+    }
+
+    // Set the credentials for the OAuth2 client
+    this.oauth2Client.setCredentials(user.googleTokenData);
 
     const result = await this.docs.documents.create({
       requestBody: {
@@ -119,6 +125,35 @@ export class GoogleService {
     if (isEmpty(doc)) {
       throw new Error('Doc does not exist');
     }
-    return doc;
+
+    const user = await this.userService.getUserById('8bfe4260-f4d4-403a-b6cf-d524d2fb6eed');
+
+    if (!(user.googleTokenData)) {
+      throw new Error('User does not have google tokens');
+    }
+
+    // Set the credentials for the OAuth2 client
+    this.oauth2Client.setCredentials(user.googleTokenData);
+
+    if (!(this.docs)) {
+      this.instantiateDoc();
+    }
+
+    var drive = google.drive({version: 'v3', auth: this.oauth2Client});
+
+    const driveData = await drive.files.export({fileId: doc.docId, mimeType: 'text/html'})
+
+    return driveData.data;
+
+    // const result = this.docs.documents.export({ documentId: doc.docId, mimeType:'text/html' });
+
+    // return result;
+  }
+
+  private instantiateDoc() {
+    this.docs = google.docs({
+      version: 'v1', // Version of the Google Docs API
+      auth: this.oauth2Client,
+    });
   }
 }

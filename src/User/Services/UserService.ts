@@ -10,24 +10,8 @@ export class UserService {
 
   constructor(private readonly dataSource: DataSource) {}
 
-  async create(userInput: CreateUserDto) {
-    const { name, email = null } = userInput;
-
-    const user: DeepPartial<User> = {
-      name,
-      email,
-      id: v4(),
-    };
-
-    const saveduser = await this.dataSource.transaction(
-      async (transactionalEntityManager: EntityManager) => {
-        const userRepository = transactionalEntityManager.getRepository(User);
-        const newUser = userRepository.create(user);
-        await userRepository.save(user);
-        return newUser;
-      },
-    );
-    return saveduser;
+  async create(userEntity: User) {
+    return await this.dataSource.getRepository(User).save(userEntity);
   }
 
   async getAllUser() {
@@ -36,5 +20,9 @@ export class UserService {
   
   async getUserByEmail(email: string) {
     return this.dataSource.getRepository(User).findOneBy({ email });
+  }
+
+  async getUserById(id: string) {
+    return this.dataSource.getRepository(User).findOneBy({ id });
   }
 }

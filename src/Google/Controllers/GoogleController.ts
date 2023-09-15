@@ -61,11 +61,19 @@ import { ConfigService } from '../../Common/Config/configService';
     async getDoc(
       @Req() req: Request,
       @Res() res: Response,
-      @Param() param: any,
-      @Query() queryParams: any,
     ) {
       const result = await this.googleService.getDoc(req.params.id);
       const response = formatResponse(result);
+      return res.status(response.statusCode).send(response);
+    }
+
+    @Put('doc/:id')
+    async updateDoc(@Req() req: Request, @Res() res: Response) {
+      const result = await this.googleService.initiateAuthentication();
+      const response = formatResponse(
+        result,
+        'Authentication initiated successfully',
+      );
       return res.status(response.statusCode).send(response);
     }
   }

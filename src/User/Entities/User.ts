@@ -17,6 +17,6 @@ export class User extends AbstractEntity {
   })
   public email!: string;
 
-  @Column()
+  @Column({type: 'json'})
   public googleTokenData: GoogleTokenModel;
 }
