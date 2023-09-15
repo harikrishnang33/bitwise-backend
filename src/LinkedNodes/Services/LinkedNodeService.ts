@@ -20,7 +20,7 @@ export class LinkedNodeService {
         plainToClass(LinkedNode, {
           sourceId,
           workspaceId,
-          destinationId: linkedNode.destinationId,
+          destinationId: linkedNode.id,
           type: linkedNode.type,
         }),
       );
