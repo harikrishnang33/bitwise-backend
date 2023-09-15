@@ -5,9 +5,11 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../../User/Entities/User';
+import { WorkspaceUsers } from './WorkspaceUsers';
 
 @Entity()
 export class Workspace extends AbstractEntity {
@@ -30,4 +32,9 @@ export class Workspace extends AbstractEntity {
   @ManyToOne(() => User, { nullable: false })
   @JoinColumn({ referencedColumnName: 'id', name: 'admin_user_id' })
   public admin!: User;
+
+  @OneToMany(() => WorkspaceUsers, (workspaceUsers) => workspaceUsers.workspace, {
+    createForeignKeyConstraints: false,
+  })
+  public workspaceUsers!: WorkspaceUsers[];
 }

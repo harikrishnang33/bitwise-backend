@@ -46,7 +46,7 @@ export class WorkspaceController {
 
   @Get()
   async getAll(@Req() request: any) {
-    const result = await this.workspaceService.getAllWorkspace();
+    const result = await this.workspaceService.getAllWorkspace(request.user);
     return formatResponse(result, 'Workspaces fetched successfully');
   }
 
