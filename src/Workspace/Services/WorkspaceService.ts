@@ -14,7 +14,7 @@ export class WorkspaceService {
   async create(workspaceDto: CreateWorkspaceDto) {
     const workspace: Workspace = plainToClass(Workspace, {
       ...workspaceDto,
-      adminUserId: '00000000-0000-0000-0000-000000000000',
+      adminUserId: '54087a6f-b78a-4e97-a6a7-70f0db52d799',
     });
 
     try {

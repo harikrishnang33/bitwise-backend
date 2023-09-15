@@ -8,7 +8,7 @@ import { formatResponse } from 'src/Common/Utils/formatResponse';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('create')
+  @Post('/')
   async create(@Res() res: Response, @Body() userInput: CreateUserDto) {
     const result = await this.userService.create(userInput);
     const response = formatResponse(result, 'User created successfully');

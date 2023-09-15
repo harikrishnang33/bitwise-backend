@@ -24,6 +24,9 @@ export class Ticket extends AbstractEntity {
   public status!: TicketStatus;
 
   @Column({ nullable: false })
+  public workspaceId!: string;
+
+  @Column({ nullable: false })
   public createdById!: string;
 
   @ManyToOne(() => User, { nullable: false })
