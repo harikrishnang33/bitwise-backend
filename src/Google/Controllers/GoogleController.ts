@@ -50,7 +50,7 @@ export class GoogleController {
   ) {
     const authCode = queryParams.code;
     const result = await this.googleService.authenticate(authCode);
-    res.cookie('accessToken', result.accessToken, {domain:"192.168.4.221:3000", httpOnly:false, secure:false, path:'/'});
+    res.cookie('accessToken', result.accessToken);
     res.cookie('refreshToken', result.refreshToken);
     const redirectUrl = `${this.configService.get(
       `FE_BASE_URL`,
