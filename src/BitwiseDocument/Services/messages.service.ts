@@ -9,13 +9,17 @@ import { isEmpty } from 'lodash';
 import { LinkedNodeService } from 'src/LinkedNodes/Services/LinkedNodeService';
 import { LinkedNode } from 'src/LinkedNodes/Entities/LinkedNode';
 import { DocumentResponseModel } from '../Models/DocumentResponseModel';
+import { GoogleService } from 'src/Google/Services/GoogleService';
+const HTMLtoDOCX = require('html-to-docx');
+// import U8 from 'uint8-encoding';
 
 @Injectable()
 export class MessagesService {
   constructor(
     private readonly dataSource: DataSource,
     private readonly linkedNodeService: LinkedNodeService,
-  ) {}
+    private readonly googleService: GoogleService,
+  ) { }
 
   async create(createDto: CreateMessageDto, user: User) {
     const document: DeepPartial<Message> = {
@@ -44,7 +48,9 @@ export class MessagesService {
     return this.mapLinkedNodesToDocument(document, linkedNodes);
   }
 
-  async upsert(id: string, updateMessageDto: UpdateMessageDto) {
+  public async upsert(id: string, updateMessageDto: UpdateMessageDto) {
+    // const message = '<p>Hello</p><p><strong>bold</strong></p><p><u>underline</u></p><p></p><p><em>italic</em></p>';
+    // const docId = '1YzDfXKHS82t8hYCat0bukhAKUeg-ZumDMoYfmMyeio0';
     const document: DeepPartial<Message> = {
       id: id ? id : v4(),
       message: updateMessageDto.message,
@@ -61,6 +67,12 @@ export class MessagesService {
         savedDocument.workspaceId,
         updateMessageDto.linkedNodes,
       );
+    }
+
+    const isGoogleDoc = await this.googleService.checkIfGoogleDocExistsInSystem(id);
+    if (isGoogleDoc) {
+      // return await this.googleService.updateGoogleDoc();
+      // this.convertHtmlToBodyElements(document.message);
     }
 
     return this.mapLinkedNodesToDocument(savedDocument, linkedNodes);
@@ -86,5 +98,23 @@ export class MessagesService {
       linkedNodes: linkedNodeModels,
     };
     return resultDoc;
+  }
+
+
+  public async temp() {
+    const message = '<p>Hello</p><p><strong>bold</strong></p><p><u>underline</u></p><p></p><p><em>italic</em></p>';
+    const googleId = '1YzDfXKHS82t8hYCat0bukhAKUeg-ZumDMoYfmMyeio0';
+
+    // const text = await this.convertHtmlToBodyElements(message);
+    // const val = U8.decode(text);
+    // return await this.googleService.updateGoogleDoc(googleId, val);
+
+    // return this.dataSource.getRepository(Message).save(document);
+  }
+
+   
+  public async convertHtmlToBodyElements(htmlContent: string) {
+    const result = await HTMLtoDOCX(htmlContent);
+    return result;
   }
 }

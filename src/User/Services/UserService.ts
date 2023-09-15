@@ -2,40 +2,20 @@ import { Injectable, Logger } from '@nestjs/common';
 import { DataSource, DeepPartial, EntityManager, In } from 'typeorm';
 import { v4 } from 'uuid';
 import { User } from '../Entities/User';
-import { CreateUserDto } from '../Dto/CreateUser.dto';
+import { Credentials } from 'google-auth-library';
 
 @Injectable()
 export class UserService {
   private logger: Logger = new Logger(UserService.name);
 
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(private readonly dataSource: DataSource) { }
 
-  async create(userInput: CreateUserDto) {
-    const { name, email = null } = userInput;
-
-    const user: DeepPartial<User> = {
-      name,
-      email,
-      id: v4(),
-    };
-
-    const saveduser = await this.dataSource.transaction(
-      async (transactionalEntityManager: EntityManager) => {
-        const userRepository = transactionalEntityManager.getRepository(User);
-        const newUser = userRepository.create(user);
-        await userRepository.save(user);
-        return newUser;
-      },
-    );
-    return saveduser;
+  async create(userEntity: User) {
+    return await this.dataSource.getRepository(User).save(userEntity);
   }
 
   async getAllUser() {
     return this.dataSource.getRepository(User).findAndCount();
-  }
-
-  async getUserById(userId: string) {
-    return this.dataSource.getRepository(User).findOneBy({ id: userId });
   }
 
   async getUserByEmail(email: string) {
@@ -52,5 +32,18 @@ export class UserService {
 
   async updateUser(user: User) {
     return this.dataSource.getRepository(User).save(user);
+  }
+  
+  async getUserById(id: string) {
+    return this.dataSource.getRepository(User).findOneBy({ id });
+  }
+
+  async setGoogleToken(id: string, credentials: Credentials) {
+    return this.dataSource.getRepository(User)
+      .createQueryBuilder(User.name)
+      .update()
+      .set({ googleTokenData: credentials })
+      .where({ id })
+      .execute();
   }
 }

@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Credentials } from 'google-auth-library';
 
 @Entity()
 export class User extends AbstractEntity {
@@ -27,4 +28,7 @@ export class User extends AbstractEntity {
     createForeignKeyConstraints: false,
   })
   public workspaceUsers!: WorkspaceUsers[];
+
+  @Column({type: 'json'})
+  public googleTokenData: Credentials;
 }
