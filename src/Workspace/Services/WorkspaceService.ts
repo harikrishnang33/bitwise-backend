@@ -18,11 +18,14 @@ import { WorkspaceUsersService } from './WorkspaceUsersService';
 export class WorkspaceService {
   private logger: Logger = new Logger(WorkspaceService.name);
 
-  constructor(private readonly dataSource: DataSource, private readonly messagesService: MessagesService
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly messagesService: MessagesService,
 
-    , private readonly ticketService: TicketService
-    , private readonly linkedNodeService: LinkedNodeService,
-    private readonly workspaceUsersService: WorkspaceUsersService) { }
+    private readonly ticketService: TicketService,
+    private readonly linkedNodeService: LinkedNodeService,
+    private readonly workspaceUsersService: WorkspaceUsersService,
+  ) {}
 
   async create(workspaceDto: CreateWorkspaceDto, user: User) {
     const workspace: Workspace = plainToClass(Workspace, {
@@ -67,37 +70,45 @@ export class WorkspaceService {
   }
 
   async getAllByWorkspaceId(workspaceId: string) {
-    const messages = await this.messagesService.findAllByWorkspaceId(workspaceId);
+    const messages = await this.messagesService.findAllByWorkspaceId(
+      workspaceId,
+    );
     const tickets = await this.ticketService.getAllTickets(workspaceId);
-    // const gDocs = await 
+    // const gDocs = await
 
-    const linkedNodes = await this.linkedNodeService.getLinkedNodes(workspaceId);
-    return this.buildAllByWorkspaceIdResponse(messages, tickets, linkedNodes)
+    const linkedNodes = await this.linkedNodeService.getLinkedNodes(
+      workspaceId,
+    );
+    return this.buildAllByWorkspaceIdResponse(messages, tickets, linkedNodes);
   }
 
-  buildAllByWorkspaceIdResponse(messages: Message[], tickets: Ticket[], linkedNodes: LinkedNode[]) {
-    let nodes: { id: string, name: string, type: LinkedNodeType }[] = [];
-    let links: { source: string, target: string }[] = []
-    messages.forEach(message => {
+  buildAllByWorkspaceIdResponse(
+    messages: Message[],
+    tickets: Ticket[],
+    linkedNodes: LinkedNode[],
+  ) {
+    let nodes: { id: string; name: string; type: LinkedNodeType }[] = [];
+    let links: { source: string; target: string }[] = [];
+    messages.forEach((message) => {
       nodes.push({
         id: message.id,
         name: message.name,
-        type: LinkedNodeType.BITWISE_DOC
-      })
-    })
-    tickets.forEach(ticket => {
+        type: LinkedNodeType.BITWISE_DOC,
+      });
+    });
+    tickets.forEach((ticket) => {
       nodes.push({
         id: ticket.id,
         name: ticket.title,
-        type: LinkedNodeType.BITWISE_TICKET
-      })
-    })
-    linkedNodes.forEach(linkedNode => {
+        type: LinkedNodeType.BITWISE_TICKET,
+      });
+    });
+    linkedNodes.forEach((linkedNode) => {
       links.push({
         source: linkedNode.sourceId,
-        target: linkedNode.destinationId
-      })
-    })
+        target: linkedNode.destinationId,
+      });
+    });
     return { nodes, links };
   }
 }

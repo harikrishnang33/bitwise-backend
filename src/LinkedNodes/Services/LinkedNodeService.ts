@@ -42,7 +42,7 @@ export class LinkedNodeService {
         const linkedNodeRepository =
           transactionalEntityManager.getRepository(LinkedNode);
         return linkedNodeRepository.findBy({
-          ...(sourceId&&{sourceId}),
+          ...(sourceId && { sourceId }),
           workspaceId,
           deletedAt: null,
         });

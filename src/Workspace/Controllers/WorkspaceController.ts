@@ -52,6 +52,8 @@ export class WorkspaceController {
 
   @Get(`/:id/all`)
   async getAllByWorkspaceId(@Param('id') workspaceId: string) {
-    return formatResponse(await this.workspaceService.getAllByWorkspaceId(workspaceId));
+    return formatResponse(
+      await this.workspaceService.getAllByWorkspaceId(workspaceId),
+    );
   }
 }

@@ -9,7 +9,13 @@ import { TicketModule } from '../Ticket';
 import { LinkedNodeModule } from '../LinkedNodes';
 
 @Module({
-  imports: [AuthModule, UserModule, MessagesModule, TicketModule, LinkedNodeModule],
+  imports: [
+    AuthModule,
+    UserModule,
+    MessagesModule,
+    TicketModule,
+    LinkedNodeModule,
+  ],
   providers: [WorkspaceService, WorkspaceUsersService],
   controllers: [WorkspaceController],
 })
