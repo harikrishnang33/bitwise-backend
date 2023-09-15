@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { formatResponse } from 'src/Common/Utils/formatResponse';
 import { CreateWorkspaceDto } from '../Dto/CreateWorkspaceDto';
 import { WorkspaceService } from '../Services/WorkspaceService';
+import { AuthGuard } from '../../Auth/Guards/AuthGuard';
 
 @Controller('workspace')
 export class WorkspaceController {
@@ -14,6 +15,7 @@ export class WorkspaceController {
   }
 
   @Get()
+  @AuthGuard()
   async getAll() {
     const result = await this.workspaceService.getAllWorkspace();
     return formatResponse(result, 'Workspaces fetched successfully');
