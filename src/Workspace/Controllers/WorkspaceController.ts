@@ -10,8 +10,14 @@ export class WorkspaceController {
 
   @Post()
   @UseGuards(AuthGuard)
-  async create(@Body() workspaceInput: CreateWorkspaceDto, @Req() request: any) {
-    const result = await this.workspaceService.create(workspaceInput, request.user);
+  async create(
+    @Body() workspaceInput: CreateWorkspaceDto,
+    @Req() request: any,
+  ) {
+    const result = await this.workspaceService.create(
+      workspaceInput,
+      request.user,
+    );
     return formatResponse(result, 'Workspace created successfully');
   }
 
