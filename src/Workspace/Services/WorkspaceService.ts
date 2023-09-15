@@ -14,6 +14,8 @@ import { LinkedNode } from '../../LinkedNodes/Entities/LinkedNode';
 import { LinkedNodeType } from '../../LinkedNodes/Enums/LinkedNodeType';
 import { WorkspaceUsersService } from './WorkspaceUsersService';
 import { WorkspaceUsers } from '../Entities/WorkspaceUsers';
+import { GoogleService } from '../../Google/Services/GoogleService';
+import { GoogleDoc } from '../../Google/Entities/GoogleDoc';
 
 @Injectable()
 export class WorkspaceService {
@@ -26,6 +28,7 @@ export class WorkspaceService {
     private readonly ticketService: TicketService,
     private readonly linkedNodeService: LinkedNodeService,
     private readonly workspaceUsersService: WorkspaceUsersService,
+    private readonly googleService: GoogleService,
   ) {}
 
   async create(workspaceDto: CreateWorkspaceDto, user: User) {
@@ -80,17 +83,18 @@ export class WorkspaceService {
       workspaceId,
     );
     const tickets = await this.ticketService.getAllTickets(workspaceId);
-    // const gDocs = await
+    const gDocs = await this.googleService.getGoogleDocsByWorkspaceId(workspaceId);
 
     const linkedNodes = await this.linkedNodeService.getLinkedNodes(
       workspaceId,
     );
-    return this.buildAllByWorkspaceIdResponse(messages, tickets, linkedNodes);
+    return this.buildAllByWorkspaceIdResponse(messages, tickets, gDocs, linkedNodes);
   }
 
   buildAllByWorkspaceIdResponse(
     messages: Message[],
     tickets: Ticket[],
+    gDocs: GoogleDoc[],
     linkedNodes: LinkedNode[],
   ) {
     let nodes: { id: string; name: string; type: LinkedNodeType }[] = [];
@@ -107,6 +111,13 @@ export class WorkspaceService {
         id: ticket.id,
         name: ticket.title,
         type: LinkedNodeType.BITWISE_TICKET,
+      });
+    });
+    gDocs.forEach((gDoc) => {
+      nodes.push({
+        id: gDoc.id,
+        name: gDoc.name,
+        type: LinkedNodeType.GOOGLE_DOC,
       });
     });
     linkedNodes.forEach((linkedNode) => {
