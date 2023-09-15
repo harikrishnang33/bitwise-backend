@@ -12,4 +12,7 @@ export class GoogleDoc extends AbstractEntity {
   @Column({ nullable: false })
   public workspaceId: string;
 
+  @Column({ nullable: false })
+  public name: string;
+
 }
