@@ -4,7 +4,7 @@ import { WorkspaceService } from './Services/WorkspaceService';
 import { WorkspaceController } from './Controllers/WorkspaceController';
 
 @Module({
-  imports:[AuthModule],
+  imports: [AuthModule],
   providers: [WorkspaceService],
   controllers: [WorkspaceController],
 })
