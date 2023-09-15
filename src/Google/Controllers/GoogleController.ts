@@ -6,12 +6,14 @@ import {
     Res,
     Query,
     Get,
+    UseGuards,
   } from '@nestjs/common';
   import { Request, Response } from 'express';
-  import { formatResponse } from 'src/Common/Utils/formatResponse';
+  import { formatResponse } from '../../Common/Utils/formatResponse';
 import { GoogleService } from '../Services/GoogleService';
 import { CreateDocDto } from '../Dtos/CreateDoc.dto';
 import { ConfigService } from '../../Common/Config/configService';
+import { AuthGuard } from '../../Auth/Guards/AuthGuard';
   
   @Controller('google')
   export class GoogleController {
@@ -21,12 +23,14 @@ import { ConfigService } from '../../Common/Config/configService';
     ) {}
   
     @Post('doc')
+    @UseGuards(AuthGuard)
     async create(
-      @Req() req: Request,
+      @Req() req: any,
       @Res() res: Response,
       @Body() userInput: CreateDocDto,
     ) {
-      const result = await this.googleService.createDoc(userInput);
+      const userId = req.user.id;
+      const result = await this.googleService.createDoc(userInput, userId);
       const response = formatResponse(result, 'Google doc created successfully');
       return res.status(response.statusCode).send(response);
     }
@@ -56,11 +60,13 @@ import { ConfigService } from '../../Common/Config/configService';
     }
 
     @Get('doc/:id')
+    @UseGuards(AuthGuard)
     async getDoc(
-      @Req() req: Request,
+      @Req() req: any,
       @Res() res: Response,
     ) {
-      const result = await this.googleService.getDocByGoogleId(req.params.id);
+      const userId = req.user.id;
+      const result = await this.googleService.getDocByGoogleId(req.params.id, userId);
       const response = formatResponse(result);
       return res.status(response.statusCode).send(response);
     }

@@ -95,7 +95,7 @@ export class GoogleService {
       user = await this.userService.create(userEntity);
     } else {
       if (newTokens) {
-        await this.userService.setGoogleToken('732022f5-b6bc-4092-b563-28d17f5dd3ab', newTokens);
+        await this.userService.setGoogleToken(user.id, newTokens);
       }
     }
     this.updateUserIfInfoChanged(user, userInfo);
@@ -111,13 +111,13 @@ export class GoogleService {
     }
   }
 
-  public async createDoc(input: CreateDocDto) {
+  public async createDoc(input: CreateDocDto, userId: string) {
     // Initialize the Google Docs API client
     if (!(this.docs)) {
       this.instantiateDoc();
     }
 
-    const user = await this.userService.getUserById('732022f5-b6bc-4092-b563-28d17f5dd3ab');
+    const user = await this.userService.getUserById(userId);
 
     if (!(user?.googleTokenData)) {
       throw new Error('User does not have google tokens');
@@ -129,7 +129,7 @@ export class GoogleService {
 
     if (this.isAccessTokenExpired()) {
       const newCredentials = await this.setNewAccessToken(user.googleTokenData);
-      await this.userService.setGoogleToken('732022f5-b6bc-4092-b563-28d17f5dd3ab', newCredentials as GoogleTokenModel);
+      await this.userService.setGoogleToken(userId, newCredentials as GoogleTokenModel);
     }
 
 
@@ -148,7 +148,7 @@ export class GoogleService {
     return result;
   }
 
-  public async getDocByGoogleId(googleId: string) {
+  public async getDocByGoogleId(googleId: string, userId: string) {
     const doc = await this.dataSource.getRepository(GoogleDoc)
       .createQueryBuilder()
       .where({ googleId })
@@ -157,7 +157,7 @@ export class GoogleService {
       throw new Error('Doc does not exist');
     }
 
-    const user = await this.userService.getUserById('732022f5-b6bc-4092-b563-28d17f5dd3ab');
+    const user = await this.userService.getUserById(userId);
 
     if (!(user?.googleTokenData)) {
       throw new Error('User does not have google tokens');
@@ -168,7 +168,7 @@ export class GoogleService {
 
     if (this.isAccessTokenExpired()) {
       const newCredentials = await this.setNewAccessToken(user.googleTokenData);
-      await this.userService.setGoogleToken('732022f5-b6bc-4092-b563-28d17f5dd3ab', newCredentials as GoogleTokenModel);
+      await this.userService.setGoogleToken(userId, newCredentials as GoogleTokenModel);
     }
 
     if (!(this.drive)) {
@@ -184,7 +184,7 @@ export class GoogleService {
     // return result;
   }
 
-  public async updateGoogleDoc(googleId: string, text: string) {
+  public async updateGoogleDoc(googleId: string, text: string, userId: string) {
 
     const doc = await this.dataSource.getRepository(GoogleDoc)
       .createQueryBuilder()
@@ -194,7 +194,7 @@ export class GoogleService {
       throw new Error('Doc does not exist');
     }
 
-    const user = await this.userService.getUserById('732022f5-b6bc-4092-b563-28d17f5dd3ab');
+    const user = await this.userService.getUserById(userId);
 
     if (!(user?.googleTokenData)) {
       throw new Error('User does not have google tokens');
@@ -205,7 +205,7 @@ export class GoogleService {
 
     if (this.isAccessTokenExpired()) {
       const newCredentials = await this.setNewAccessToken(user.googleTokenData);
-      await this.userService.setGoogleToken('732022f5-b6bc-4092-b563-28d17f5dd3ab', newCredentials as GoogleTokenModel);
+      await this.userService.setGoogleToken(userId, newCredentials as GoogleTokenModel);
     }
 
     if (!(this.docs)) {
