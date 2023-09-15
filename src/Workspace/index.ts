@@ -16,7 +16,7 @@ import { GoogleModule } from '../Google';
     MessagesModule,
     TicketModule,
     LinkedNodeModule,
-    GoogleModule
+    GoogleModule,
   ],
   providers: [WorkspaceService, WorkspaceUsersService],
   controllers: [WorkspaceController],

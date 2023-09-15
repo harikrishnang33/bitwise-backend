@@ -33,8 +33,12 @@ export class Workspace extends AbstractEntity {
   @JoinColumn({ referencedColumnName: 'id', name: 'admin_user_id' })
   public admin!: User;
 
-  @OneToMany(() => WorkspaceUsers, (workspaceUsers) => workspaceUsers.workspace, {
-    createForeignKeyConstraints: false,
-  })
+  @OneToMany(
+    () => WorkspaceUsers,
+    (workspaceUsers) => workspaceUsers.workspace,
+    {
+      createForeignKeyConstraints: false,
+    },
+  )
   public workspaceUsers!: WorkspaceUsers[];
 }

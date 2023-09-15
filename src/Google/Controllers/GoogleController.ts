@@ -20,7 +20,7 @@ export class GoogleController {
   constructor(
     private readonly googleService: GoogleService,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   @Post('doc')
   @UseGuards(AuthGuard)
@@ -74,12 +74,8 @@ export class GoogleController {
   @UseGuards(AuthGuard)
   async getDoc(@Req() req: any, @Res() res: Response) {
     const userId = req.user.id;
-    const result = await this.googleService.getDocById(
-      req.params.id,
-      userId,
-    );
+    const result = await this.googleService.getDocById(req.params.id, userId);
     const response = formatResponse(result);
     return res.status(response.statusCode).send(response);
   }
-
 }

@@ -251,11 +251,11 @@ export class GoogleService {
     return !isEmpty(doc);
   }
 
-
   public async getGoogleDocsByWorkspaceId(workspaceId: string) {
-    return this.dataSource.getRepository(GoogleDoc)
+    return this.dataSource
+      .getRepository(GoogleDoc)
       .createQueryBuilder(GoogleDoc.name)
-      .where({workspaceId, deletedAt: IsNull()})
+      .where({ workspaceId, deletedAt: IsNull() })
       .getMany();
   }
 
