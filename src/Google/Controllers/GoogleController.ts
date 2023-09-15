@@ -1,18 +1,19 @@
 import {
   Body,
   Controller,
-  Put,
   Post,
   Req,
   Res,
   Query,
   Get,
+  UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { formatResponse } from 'src/Common/Utils/formatResponse';
+import { formatResponse } from '../../Common/Utils/formatResponse';
 import { GoogleService } from '../Services/GoogleService';
 import { CreateDocDto } from '../Dtos/CreateDoc.dto';
 import { ConfigService } from '../../Common/Config/configService';
+import { AuthGuard } from '../../Auth/Guards/AuthGuard';
 
 @Controller('google')
 export class GoogleController {
@@ -21,13 +22,15 @@ export class GoogleController {
     private readonly configService: ConfigService,
   ) {}
 
-  @Post('create')
+  @Post('doc')
+  @UseGuards(AuthGuard)
   async create(
-    @Req() req: Request,
+    @Req() req: any,
     @Res() res: Response,
     @Body() userInput: CreateDocDto,
   ) {
-    const result = await this.googleService.createDoc(userInput);
+    const userId = req.user.id;
+    const result = await this.googleService.createDoc(userInput, userId);
     const response = formatResponse(result, 'Google doc created successfully');
     return res.status(response.statusCode).send(response);
   }
@@ -45,17 +48,28 @@ export class GoogleController {
   @Get('authenticate')
   async authenticate(
     @Req() req: Request,
-    @Res() res: Response,
+    @Res({ passthrough: true }) res: Response,
     @Query() queryParams: any,
   ) {
     const authCode = queryParams.code;
     const result = await this.googleService.authenticate(authCode);
-    const response = formatResponse(result, 'Authenticated successfully');
     res.cookie('accessToken', result.accessToken);
     res.cookie('refreshToken', result.refreshToken);
     const redirectUrl = `${this.configService.get(
       `FE_BASE_URL`,
     )}/${this.configService.get(`FE_SUCCESS_PATH`)}`;
     res.redirect(redirectUrl);
+  }
+
+  @Get('doc/:id')
+  @UseGuards(AuthGuard)
+  async getDoc(@Req() req: any, @Res() res: Response) {
+    const userId = req.user.id;
+    const result = await this.googleService.getDocByGoogleId(
+      req.params.id,
+      userId,
+    );
+    const response = formatResponse(result);
+    return res.status(response.statusCode).send(response);
   }
 }

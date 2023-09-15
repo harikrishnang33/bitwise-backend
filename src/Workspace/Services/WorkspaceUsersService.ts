@@ -78,4 +78,9 @@ export class WorkspaceUsersService {
       repo.softDelete({ workspaceId, userId });
     }
   }
+
+  async workspaceUsers(workspaceId: string) {
+    const repo = this.dataSource.getRepository(WorkspaceUsers);
+    return repo.find({ where: { workspaceId }, relations: ['user'] });
+  }
 }
