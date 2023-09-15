@@ -23,8 +23,10 @@ export class TicketService {
     return this.dataSource.getRepository(Ticket).save(ticket);
   }
 
-  async getAllTickets(): Promise<Ticket[]> {
-    return this.dataSource.getRepository(Ticket).find();
+  async getAllTickets(workspaceId: string): Promise<Ticket[]> {
+    return this.dataSource
+      .getRepository(Ticket)
+      .find({ where: { workspaceId } });
   }
 
   async getTicketById(id: string): Promise<Ticket> {

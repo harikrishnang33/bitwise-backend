@@ -25,9 +25,12 @@ export class TicketController {
     return res.status(response.statusCode).send(response);
   }
 
-  @Get('/')
-  async getAll(@Res() res: Response) {
-    const result = await this.ticketService.getAllTickets();
+  @Get('/:workspaceId')
+  async getAll(
+    @Res() res: Response,
+    @Param('workspaceId') workspaceId: string,
+  ) {
+    const result = await this.ticketService.getAllTickets(workspaceId);
     const response = formatResponse(result);
     return res.status(response.statusCode).send(response);
   }
