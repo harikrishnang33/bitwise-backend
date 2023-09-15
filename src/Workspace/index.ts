@@ -7,6 +7,7 @@ import { UserModule } from 'src/User';
 import { MessagesModule } from '../BitwiseDocument';
 import { TicketModule } from '../Ticket';
 import { LinkedNodeModule } from '../LinkedNodes';
+import { GoogleModule } from '../Google';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { LinkedNodeModule } from '../LinkedNodes';
     MessagesModule,
     TicketModule,
     LinkedNodeModule,
+    GoogleModule
   ],
   providers: [WorkspaceService, WorkspaceUsersService],
   controllers: [WorkspaceController],
