@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { CreateUserDto } from '../Dto/CreateUser.dto';
 import { UserService } from '../Services/UserService';
@@ -19,6 +19,13 @@ export class UserController {
   async getAll(@Req() req: Request, @Res() res: Response) {
     const result = await this.userService.getAllUser();
     const response = formatResponse(result, 'Users fetched successfully');
+    return res.status(response.statusCode).send(response);
+  }
+
+  @Get('/:userId')
+  async getUserById(@Res() res: Response, @Param('userId') userId: string) {
+    const result = await this.userService.getUserById(userId);
+    const response = formatResponse(result, 'User fetched successfully');
     return res.status(response.statusCode).send(response);
   }
 }
