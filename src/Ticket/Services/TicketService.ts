@@ -18,6 +18,7 @@ export class TicketService {
       createdById: input.createdBy,
       status: TicketStatus.OPEN,
       description: input.description,
+      workspaceId: input.workspaceId,
     };
     return this.dataSource.getRepository(Ticket).save(ticket);
   }

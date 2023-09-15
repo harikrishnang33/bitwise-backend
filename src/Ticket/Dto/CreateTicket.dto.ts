@@ -11,4 +11,8 @@ export class CreateTicketDto {
   @IsString()
   @IsOptional()
   description: string;
+
+  @IsString()
+  @IsNotEmpty()
+  workspaceId: string;
 }

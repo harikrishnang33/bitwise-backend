@@ -18,7 +18,7 @@ import { UpdateTicketStatusDto } from '../Dto/UpdateTicketStatus.dto';
 export class TicketController {
   constructor(private readonly ticketService: TicketService) {}
 
-  @Post('create')
+  @Post('/')
   async create(@Res() res: Response, @Body() input: CreateTicketDto) {
     const result = await this.ticketService.createTicket(input);
     const response = formatResponse(result, 'Ticket created successfully');
