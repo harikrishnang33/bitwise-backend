@@ -38,8 +38,8 @@ export class MessagesService {
       .getRepository(Message)
       .findOneBy({ id });
     const linkedNodes = await this.linkedNodeService.getLinkedNodes(
-      document.id,
       document.workspaceId,
+      document.id,
     );
     return this.mapLinkedNodesToDocument(document, linkedNodes);
   }
