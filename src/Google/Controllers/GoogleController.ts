@@ -20,7 +20,7 @@ export class GoogleController {
   constructor(
     private readonly googleService: GoogleService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   @Post('doc')
   @UseGuards(AuthGuard)
@@ -61,15 +61,25 @@ export class GoogleController {
     res.redirect(redirectUrl);
   }
 
+  @Get('doc/workspace/:id')
+  async getDocsByWorkspaceId(@Req() req: any, @Res() res: Response) {
+    const result = await this.googleService.getGoogleDocsByWorkspaceId(
+      req.params.id,
+    );
+    const response = formatResponse(result);
+    return res.status(response.statusCode).send(response);
+  }
+
   @Get('doc/:id')
   @UseGuards(AuthGuard)
   async getDoc(@Req() req: any, @Res() res: Response) {
     const userId = req.user.id;
-    const result = await this.googleService.getDocByGoogleId(
+    const result = await this.googleService.getDocById(
       req.params.id,
       userId,
     );
     const response = formatResponse(result);
     return res.status(response.statusCode).send(response);
   }
+
 }

@@ -5,7 +5,7 @@ import { Credentials, OAuth2Client } from 'google-auth-library';
 import { UserService } from '../../User/Services/UserService';
 import TokenService from '../../Auth/Services/TokenService';
 import { User } from '../../User/Entities/User';
-import { DataSource } from 'typeorm';
+import { DataSource, IsNull } from 'typeorm';
 import { plainToClass } from 'class-transformer';
 import { GoogleDoc } from '../Entities/GoogleDoc';
 import { isEmpty } from 'lodash';
@@ -142,17 +142,18 @@ export class GoogleService {
     if (result?.data?.documentId) {
       const docEntity = plainToClass(GoogleDoc, {
         googleId: result.data.documentId,
+        workspaceId: input.workspaceId,
       });
       await this.dataSource.getRepository(GoogleDoc).save(docEntity);
     }
     return result;
   }
 
-  public async getDocByGoogleId(googleId: string, userId: string) {
+  public async getDocById(id: string, userId: string) {
     const doc = await this.dataSource
       .getRepository(GoogleDoc)
       .createQueryBuilder()
-      .where({ googleId })
+      .where({ id })
       .getOne();
     if (isEmpty(doc)) {
       throw new Error('Doc does not exist');
@@ -247,6 +248,14 @@ export class GoogleService {
       .where({ id })
       .getOne();
     return !isEmpty(doc);
+  }
+
+
+  public async getGoogleDocsByWorkspaceId(workspaceId: string) {
+    return this.dataSource.getRepository(GoogleDoc)
+      .createQueryBuilder(GoogleDoc.name)
+      .where({workspaceId, deletedAt: IsNull()})
+      .getMany();
   }
 
   private async setNewAccessToken(tokens: Credentials) {
