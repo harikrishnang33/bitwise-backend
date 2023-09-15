@@ -12,6 +12,7 @@ import { DocumentResponseModel } from '../Models/DocumentResponseModel';
 import { GoogleService } from 'src/Google/Services/GoogleService';
 const HTMLtoDOCX = require('html-to-docx');
 // import U8 from 'uint8-encoding';
+import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class MessagesService {
@@ -19,15 +20,15 @@ export class MessagesService {
     private readonly dataSource: DataSource,
     private readonly linkedNodeService: LinkedNodeService,
     private readonly googleService: GoogleService,
-  ) { }
+  ) {}
 
   async create(createDto: CreateMessageDto, user: User) {
-    const document: DeepPartial<Message> = {
+    const document = plainToClass(Message, {
       id: v4(),
       name: createDto.name,
       workspaceId: createDto.workspaceId,
       ownerId: user.id,
-    };
+    });
     return this.dataSource.getRepository(Message).save(document);
   }
 
@@ -40,25 +41,34 @@ export class MessagesService {
   async findOneById(id: string) {
     const document = await this.dataSource
       .getRepository(Message)
-      .findOneBy({ id });
+      .findOne({ where: { id } });
     const linkedNodes = await this.linkedNodeService.getLinkedNodes(
       document.workspaceId,
       document.id,
     );
-    return this.mapLinkedNodesToDocument(document, linkedNodes);
+    const linkedDestinationDocuments = await this.dataSource
+      .getRepository(Message)
+      .createQueryBuilder(Message.name)
+      .whereInIds(
+        linkedNodes.map((linkedNode: LinkedNode) => linkedNode.destinationId),
+      )
+      .getMany();
+    return this.mapLinkedNodesToDocument(
+      document,
+      linkedNodes,
+      linkedDestinationDocuments,
+    );
   }
 
   public async upsert(id: string, updateMessageDto: UpdateMessageDto) {
-    // const message = '<p>Hello</p><p><strong>bold</strong></p><p><u>underline</u></p><p></p><p><em>italic</em></p>';
-    // const docId = '1YzDfXKHS82t8hYCat0bukhAKUeg-ZumDMoYfmMyeio0';
-    const document: DeepPartial<Message> = {
+    const document: Message = plainToClass(Message, {
       id: id ? id : v4(),
       message: updateMessageDto.message,
-    };
+    });
     await this.dataSource.getRepository(Message).save(document);
     const savedDocument = await this.dataSource
       .getRepository(Message)
-      .findOneBy({ id });
+      .findOne({ where: { id } });
     await this.linkedNodeService.softDelete(id);
     let linkedNodes: LinkedNode[] = [];
     if (!isEmpty(updateMessageDto.linkedNodes)) {
@@ -69,13 +79,26 @@ export class MessagesService {
       );
     }
 
-    const isGoogleDoc = await this.googleService.checkIfGoogleDocExistsInSystem(id);
+    const isGoogleDoc = await this.googleService.checkIfGoogleDocExistsInSystem(
+      id,
+    );
     if (isGoogleDoc) {
       // return await this.googleService.updateGoogleDoc();
       // this.convertHtmlToBodyElements(document.message);
     }
 
-    return this.mapLinkedNodesToDocument(savedDocument, linkedNodes);
+    const linkedDestinationDocuments = await this.dataSource
+      .getRepository(Message)
+      .createQueryBuilder(Message.name)
+      .whereInIds(
+        linkedNodes.map((linkedNode: LinkedNode) => linkedNode.destinationId),
+      )
+      .getMany();
+    return this.mapLinkedNodesToDocument(
+      savedDocument,
+      linkedNodes,
+      linkedDestinationDocuments,
+    );
   }
 
   async softDeleteById(id: string) {
@@ -83,9 +106,18 @@ export class MessagesService {
     await this.linkedNodeService.softDelete(id);
   }
 
-  mapLinkedNodesToDocument(document: Message, linkedNodes: LinkedNode[]) {
+  mapLinkedNodesToDocument(
+    document: Message,
+    linkedNodes: LinkedNode[],
+    linkedDestinationDocuments: Message[],
+  ) {
+    const linkedDestinationDocumentsMap: Map<string, Message> = new Map();
+    linkedDestinationDocuments?.forEach((document: Message) => {
+      linkedDestinationDocumentsMap.set(document.id, document);
+    });
     const linkedNodeModels = linkedNodes?.map((linkedNode) => ({
       id: linkedNode.destinationId,
+      name: linkedDestinationDocumentsMap.get(linkedNode.destinationId).name,
       type: linkedNode.type,
     }));
 
@@ -100,9 +132,9 @@ export class MessagesService {
     return resultDoc;
   }
 
-
   public async temp() {
-    const message = '<p>Hello</p><p><strong>bold</strong></p><p><u>underline</u></p><p></p><p><em>italic</em></p>';
+    const message =
+      '<p>Hello</p><p><strong>bold</strong></p><p><u>underline</u></p><p></p><p><em>italic</em></p>';
     const googleId = '1YzDfXKHS82t8hYCat0bukhAKUeg-ZumDMoYfmMyeio0';
 
     // const text = await this.convertHtmlToBodyElements(message);
@@ -112,7 +144,6 @@ export class MessagesService {
     // return this.dataSource.getRepository(Message).save(document);
   }
 
-   
   public async convertHtmlToBodyElements(htmlContent: string) {
     const result = await HTMLtoDOCX(htmlContent);
     return result;

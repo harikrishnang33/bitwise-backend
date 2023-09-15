@@ -8,7 +8,7 @@ import { Credentials } from 'google-auth-library';
 export class UserService {
   private logger: Logger = new Logger(UserService.name);
 
-  constructor(private readonly dataSource: DataSource) { }
+  constructor(private readonly dataSource: DataSource) {}
 
   async create(userEntity: User) {
     return await this.dataSource.getRepository(User).save(userEntity);
@@ -33,13 +33,14 @@ export class UserService {
   async updateUser(user: User) {
     return this.dataSource.getRepository(User).save(user);
   }
-  
+
   async getUserById(id: string) {
     return this.dataSource.getRepository(User).findOneBy({ id });
   }
 
   async setGoogleToken(id: string, credentials: Credentials) {
-    return this.dataSource.getRepository(User)
+    return this.dataSource
+      .getRepository(User)
       .createQueryBuilder(User.name)
       .update()
       .set({ googleTokenData: credentials })

@@ -71,7 +71,6 @@ export class GoogleService {
   }
 
   public async authenticate(authCode: string) {
-
     const { tokens } = await this.oauth2Client.getToken(authCode); // the oauth2Client credentials will then be set by the "this.oauth2Client.on('tokens', (tokens)" event
     let newTokens: Credentials;
     if (this.isAccessTokenExpired()) {
@@ -91,7 +90,7 @@ export class GoogleService {
         email: userInfo.email,
         name: userInfo.email,
         googleTokenData: newTokens ?? tokens,
-      })
+      });
       user = await this.userService.create(userEntity);
     } else {
       if (newTokens) {
@@ -101,7 +100,6 @@ export class GoogleService {
     this.updateUserIfInfoChanged(user, userInfo);
 
     return this.tokenService.generateAccessAndRefreshTokens(user.id);
-
   }
 
   updateUserIfInfoChanged(user: User, gTokenPayload: any) {
@@ -113,25 +111,26 @@ export class GoogleService {
 
   public async createDoc(input: CreateDocDto, userId: string) {
     // Initialize the Google Docs API client
-    if (!(this.docs)) {
+    if (!this.docs) {
       this.instantiateDoc();
     }
 
     const user = await this.userService.getUserById(userId);
 
-    if (!(user?.googleTokenData)) {
+    if (!user?.googleTokenData) {
       throw new Error('User does not have google tokens');
     }
-
 
     // Set the credentials for the OAuth2 client
     this.oauth2Client.setCredentials(user.googleTokenData);
 
     if (this.isAccessTokenExpired()) {
       const newCredentials = await this.setNewAccessToken(user.googleTokenData);
-      await this.userService.setGoogleToken(userId, newCredentials as GoogleTokenModel);
+      await this.userService.setGoogleToken(
+        userId,
+        newCredentials as GoogleTokenModel,
+      );
     }
-
 
     const result = await this.docs.documents.create({
       requestBody: {
@@ -149,7 +148,8 @@ export class GoogleService {
   }
 
   public async getDocByGoogleId(googleId: string, userId: string) {
-    const doc = await this.dataSource.getRepository(GoogleDoc)
+    const doc = await this.dataSource
+      .getRepository(GoogleDoc)
       .createQueryBuilder()
       .where({ googleId })
       .getOne();
@@ -159,7 +159,7 @@ export class GoogleService {
 
     const user = await this.userService.getUserById(userId);
 
-    if (!(user?.googleTokenData)) {
+    if (!user?.googleTokenData) {
       throw new Error('User does not have google tokens');
     }
 
@@ -168,14 +168,20 @@ export class GoogleService {
 
     if (this.isAccessTokenExpired()) {
       const newCredentials = await this.setNewAccessToken(user.googleTokenData);
-      await this.userService.setGoogleToken(userId, newCredentials as GoogleTokenModel);
+      await this.userService.setGoogleToken(
+        userId,
+        newCredentials as GoogleTokenModel,
+      );
     }
 
-    if (!(this.drive)) {
+    if (!this.drive) {
       this.instantiateDrive();
     }
 
-    const driveData = await this.drive.files.export({ fileId: doc.googleId, mimeType: 'text/html' })
+    const driveData = await this.drive.files.export({
+      fileId: doc.googleId,
+      mimeType: 'text/html',
+    });
 
     return driveData.data;
 
@@ -185,8 +191,8 @@ export class GoogleService {
   }
 
   public async updateGoogleDoc(googleId: string, text: string, userId: string) {
-
-    const doc = await this.dataSource.getRepository(GoogleDoc)
+    const doc = await this.dataSource
+      .getRepository(GoogleDoc)
       .createQueryBuilder()
       .where({ googleId })
       .getOne();
@@ -196,7 +202,7 @@ export class GoogleService {
 
     const user = await this.userService.getUserById(userId);
 
-    if (!(user?.googleTokenData)) {
+    if (!user?.googleTokenData) {
       throw new Error('User does not have google tokens');
     }
 
@@ -205,10 +211,13 @@ export class GoogleService {
 
     if (this.isAccessTokenExpired()) {
       const newCredentials = await this.setNewAccessToken(user.googleTokenData);
-      await this.userService.setGoogleToken(userId, newCredentials as GoogleTokenModel);
+      await this.userService.setGoogleToken(
+        userId,
+        newCredentials as GoogleTokenModel,
+      );
     }
 
-    if (!(this.docs)) {
+    if (!this.docs) {
       this.instantiateDoc();
     }
 
@@ -231,7 +240,8 @@ export class GoogleService {
   }
 
   public async checkIfGoogleDocExistsInSystem(id: string) {
-    const doc = await this.dataSource.getRepository(GoogleDoc)
+    const doc = await this.dataSource
+      .getRepository(GoogleDoc)
       .createQueryBuilder()
       .where({ id })
       .getOne();

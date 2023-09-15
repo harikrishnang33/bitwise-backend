@@ -8,5 +8,4 @@ export class GoogleDoc extends AbstractEntity {
 
   @Column({ nullable: true })
   public googleId: string;
-
 }
