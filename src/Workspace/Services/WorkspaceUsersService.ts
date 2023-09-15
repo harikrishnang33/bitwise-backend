@@ -25,8 +25,12 @@ export class WorkspaceUsersService {
     workspaceId: string,
     emailIds: string[],
   ) {
-    const userIds = await this.userService.getUserIdsFromEmailIds(emailIds);
-    this.createWorkspaceUsers(workspaceId, userIds);
+    const userIds = await Promise.all(
+      (
+        await this.userService.getUserIdsFromEmailIds(emailIds)
+      ).map(async (user) => user.id),
+    );
+    await this.createWorkspaceUsers(workspaceId, userIds);
   }
 
   async createWorkspaceUsers(workspaceId: string, userIds: string[]) {
@@ -40,12 +44,27 @@ export class WorkspaceUsersService {
     const existingIds = (await this.getWorkspaceUser(workspaceId)).map(
       (workspaceUser) => workspaceUser.userId,
     );
-    const newIds = await this.userService.getUserIdsFromEmailIds(emails);
+    const users = await this.userService.getUserIdsFromEmailIds(emails);
+    const newIds = await Promise.all(users.map(async (user) => user.id));
 
     const { itemsToAdd, itemsToRemove } = itemsToAddAndRemove(
       existingIds,
       newIds,
       (id) => id,
+    );
+
+    const existingEmails = users.map((user) => user.email);
+
+    const { itemsToAdd: emailsToInsert } = itemsToAddAndRemove(
+      existingEmails,
+      emails,
+      (id) => id,
+    );
+
+    await Promise.all(
+      emailsToInsert.map((email) => {
+        this.userService.create({ email });
+      }),
     );
 
     await this.removeWorkspaceUsers(workspaceId, itemsToRemove);

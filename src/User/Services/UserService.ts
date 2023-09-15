@@ -44,11 +44,9 @@ export class UserService {
 
   async getUserIdsFromEmailIds(emailIds: string[]) {
     return Promise.all(
-      (
-        await this.dataSource
-          .getRepository(User)
-          .find({ where: { email: In(emailIds) } })
-      ).map(async (user) => user.id),
+      await this.dataSource
+        .getRepository(User)
+        .find({ where: { email: In(emailIds) } }),
     );
   }
 }
