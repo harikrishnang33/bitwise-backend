@@ -1,8 +1,18 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { formatResponse } from 'src/Common/Utils/formatResponse';
 import { CreateWorkspaceDto } from '../Dto/CreateWorkspaceDto';
 import { WorkspaceService } from '../Services/WorkspaceService';
 import { AuthGuard } from '../../Auth/Guards/AuthGuard';
+import { UpdateWorkspaceDto } from '../Dto/UpdateWorksapceDto';
 
 @Controller('workspace')
 @UseGuards(AuthGuard)
@@ -19,6 +29,19 @@ export class WorkspaceController {
       request.user,
     );
     return formatResponse(result, 'Workspace created successfully');
+  }
+
+  @Patch('/:workspaceId')
+  async update(
+    @Body() workspaceInput: UpdateWorkspaceDto,
+    @Param('workspaceId') workspaceId: string,
+    @Req() request: any,
+  ) {
+    const result = await this.workspaceService.updateWorkspace(
+      workspaceId,
+      workspaceInput.emails,
+    );
+    return formatResponse(result, 'Workspace updated successfully');
   }
 
   @Get()

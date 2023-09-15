@@ -12,6 +12,7 @@ import { Message } from '../../BitwiseDocument/Entities/message.entity';
 import { Ticket } from '../../Ticket/Entities/Ticket';
 import { LinkedNode } from '../../LinkedNodes/Entities/LinkedNode';
 import { LinkedNodeType } from '../../LinkedNodes/Enums/LinkedNodeType';
+import { WorkspaceUsersService } from './WorkspaceUsersService';
 
 @Injectable()
 export class WorkspaceService {
@@ -20,7 +21,8 @@ export class WorkspaceService {
   constructor(private readonly dataSource: DataSource, private readonly messagesService: MessagesService
 
     , private readonly ticketService: TicketService
-    , private readonly linkedNodeService: LinkedNodeService) { }
+    , private readonly linkedNodeService: LinkedNodeService,
+    private readonly workspaceUsersService: WorkspaceUsersService) { }
 
   async create(workspaceDto: CreateWorkspaceDto, user: User) {
     const workspace: Workspace = plainToClass(Workspace, {
@@ -32,6 +34,15 @@ export class WorkspaceService {
       const savedWorkspace = await this.dataSource
         .getRepository(Workspace)
         .save(workspace);
+      await this.workspaceUsersService.createWorkspaceUsers(savedWorkspace.id, [
+        user.id,
+      ]);
+      if (workspaceDto.emails && workspaceDto.emails.length > 0) {
+        await this.workspaceUsersService.createWorkspaceUsersFromEmailIds(
+          savedWorkspace.id,
+          workspaceDto.emails,
+        );
+      }
       return savedWorkspace;
     } catch (error) {
       this.logger.error(`Error creating workspace | ${error.message}`);
@@ -41,6 +52,10 @@ export class WorkspaceService {
         );
       }
     }
+  }
+
+  async updateWorkspace(workspaceId: string, emails: string[]) {
+    this.workspaceUsersService.update(workspaceId, emails);
   }
 
   async getAllWorkspace() {

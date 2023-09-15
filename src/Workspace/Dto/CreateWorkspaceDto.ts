@@ -8,4 +8,6 @@ export class CreateWorkspaceDto {
   @IsString()
   @IsNotEmpty()
   description: string;
+
+  emails: string[];
 }

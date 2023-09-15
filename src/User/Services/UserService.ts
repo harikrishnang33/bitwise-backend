@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { DataSource, DeepPartial, EntityManager } from 'typeorm';
+import { DataSource, DeepPartial, EntityManager, In } from 'typeorm';
 import { v4 } from 'uuid';
 import { User } from '../Entities/User';
 import { CreateUserDto } from '../Dto/CreateUser.dto';
@@ -40,5 +40,13 @@ export class UserService {
 
   async getUserByEmail(email: string) {
     return this.dataSource.getRepository(User).findOneBy({ email });
+  }
+
+  async getUserIdsFromEmailIds(emailIds: string[]) {
+    return Promise.all(
+      await this.dataSource
+        .getRepository(User)
+        .find({ where: { email: In(emailIds) } }),
+    );
   }
 }
