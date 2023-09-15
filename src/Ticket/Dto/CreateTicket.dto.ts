@@ -6,9 +6,6 @@ export class CreateTicketDto {
   title!: string;
 
   @IsString()
-  createdBy!: string;
-
-  @IsString()
   @IsOptional()
   description: string;
 
