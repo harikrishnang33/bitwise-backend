@@ -18,13 +18,6 @@ import { AuthGuard } from '../../Auth/Guards/AuthGuard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('/')
-  async create(@Res() res: Response, @Body() userInput: CreateUserDto) {
-    const result = await this.userService.create(userInput);
-    const response = formatResponse(result, 'User created successfully');
-    return res.status(response.statusCode).send(response);
-  }
-
   @Get('/')
   async getAll(@Req() req: Request, @Res() res: Response) {
     const result = await this.userService.getAllUser();

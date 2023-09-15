@@ -5,9 +5,10 @@ import { DocumentsController } from './Controllers/documents.controller';
 import { CommonModule } from 'src/Common';
 import { LinkedNodeModule } from 'src/LinkedNodes';
 import AuthModule from 'src/Auth';
+import { GoogleModule } from 'src/Google';
 
 @Module({
-  imports: [CommonModule, LinkedNodeModule, AuthModule],
+  imports: [CommonModule, LinkedNodeModule, AuthModule, GoogleModule],
   providers: [MessagesGateway, MessagesService],
   controllers: [DocumentsController],
   exports: [MessagesService],
