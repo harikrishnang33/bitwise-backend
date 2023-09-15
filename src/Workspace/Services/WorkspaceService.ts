@@ -66,9 +66,11 @@ export class WorkspaceService {
   }
 
   async getAllWorkspace(user: User) {
-    const queryBuilder = this.dataSource.getRepository(WorkspaceUsers).createQueryBuilder('WorkspaceUsers')
+    const queryBuilder = this.dataSource
+      .getRepository(WorkspaceUsers)
+      .createQueryBuilder('WorkspaceUsers')
       .where('WorkspaceUsers.deletedAt IS NULL')
-      .andWhere(`WorkspaceUsers.userId = :userId`, {userId:user.id})
+      .andWhere(`WorkspaceUsers.userId = :userId`, { userId: user.id })
       .leftJoinAndSelect('WorkspaceUsers.workspace', 'workspace')
       .leftJoinAndSelect('workspace.workspaceUsers', 'workspaceUsers')
       .leftJoinAndSelect('workspaceUsers.user', 'user')
@@ -83,12 +85,19 @@ export class WorkspaceService {
       workspaceId,
     );
     const tickets = await this.ticketService.getAllTickets(workspaceId);
-    const gDocs = await this.googleService.getGoogleDocsByWorkspaceId(workspaceId);
+    const gDocs = await this.googleService.getGoogleDocsByWorkspaceId(
+      workspaceId,
+    );
 
     const linkedNodes = await this.linkedNodeService.getLinkedNodes(
       workspaceId,
     );
-    return this.buildAllByWorkspaceIdResponse(messages, tickets, gDocs, linkedNodes);
+    return this.buildAllByWorkspaceIdResponse(
+      messages,
+      tickets,
+      gDocs,
+      linkedNodes,
+    );
   }
 
   buildAllByWorkspaceIdResponse(

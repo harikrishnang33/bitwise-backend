@@ -60,11 +60,27 @@ export class MessagesService {
     );
   }
 
-  public async upsert(id: string, updateMessageDto: UpdateMessageDto, userId: string) {
+  public async upsert(
+    id: string,
+    updateMessageDto: UpdateMessageDto,
+    userId: string,
+  ) {
     const document: Message = plainToClass(Message, {
       id: id ? id : v4(),
       message: updateMessageDto.message,
     });
+
+    const isGoogleDoc = await this.googleService.checkIfGoogleDocExistsInSystem(
+      id,
+    );
+    if (isGoogleDoc) {
+      return this.googleService.updateGoogleDoc(
+        id,
+        updateMessageDto.message,
+        userId,
+      );
+    }
+
     await this.dataSource.getRepository(Message).save(document);
     const savedDocument = await this.dataSource
       .getRepository(Message)
@@ -77,13 +93,6 @@ export class MessagesService {
         savedDocument.workspaceId,
         updateMessageDto.linkedNodes,
       );
-    }
-
-    const isGoogleDoc = await this.googleService.checkIfGoogleDocExistsInSystem(
-      id,
-    );
-    if (isGoogleDoc) {
-      return this.googleService.updateGoogleDoc(id, updateMessageDto.message, userId);
     }
 
     const linkedDestinationDocuments = await this.dataSource
