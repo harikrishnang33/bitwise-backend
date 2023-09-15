@@ -69,7 +69,7 @@ export class WorkspaceUsersService {
     );
 
     await this.removeWorkspaceUsers(workspaceId, itemsToRemove);
-    await this.createWorkspaceUsers(workspaceId, itemsToAdd);
+    return this.createWorkspaceUsers(workspaceId, itemsToAdd);
   }
 
   async removeWorkspaceUsers(workspaceId: string, userIds: string[]) {
