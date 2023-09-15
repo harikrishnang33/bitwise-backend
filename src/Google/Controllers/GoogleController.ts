@@ -12,10 +12,14 @@ import {
   import { formatResponse } from 'src/Common/Utils/formatResponse';
 import { GoogleService } from '../Services/GoogleService';
 import { CreateDocDto } from '../Dtos/CreateDoc.dto';
+import { ConfigService } from '../../Common/Config/configService';
   
   @Controller('google')
   export class GoogleController {
-    constructor(private readonly googleService: GoogleService) {}
+    constructor(
+      private readonly googleService: GoogleService,
+      private readonly configService: ConfigService,
+    ) {}
   
     @Post('create')
     async create(
@@ -41,12 +45,14 @@ import { CreateDocDto } from '../Dtos/CreateDoc.dto';
     @Get('authenticate')
     async authenticate(
       @Req() req: Request,
-      @Res() res: Response,
+      @Res({ passthrough: true }) res: Response,
       @Query() queryParams: any,
     ) {
       const authCode = queryParams.code;
       const result = await this.googleService.authenticate(authCode);
-      const response = formatResponse(result, 'Authenticated successfully');
-      return res.status(response.statusCode).send(response);
+      res.cookie('accessToken', result.accessToken);
+      res.cookie('refreshToken', result.refreshToken);
+      const redirectUrl = `${this.configService.get(`FE_BASE_URL`)}/${this.configService.get(`FE_SUCCESS_PATH`)}`;
+      res.redirect(redirectUrl);
     }
   }
