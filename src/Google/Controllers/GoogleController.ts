@@ -7,6 +7,7 @@ import {
     Res,
     Query,
     Get,
+    Param,
   } from '@nestjs/common';
   import { Request, Response } from 'express';
   import { formatResponse } from 'src/Common/Utils/formatResponse';
@@ -21,7 +22,7 @@ import { ConfigService } from '../../Common/Config/configService';
       private readonly configService: ConfigService,
     ) {}
   
-    @Post('create')
+    @Post('doc')
     async create(
       @Req() req: Request,
       @Res() res: Response,
@@ -54,5 +55,17 @@ import { ConfigService } from '../../Common/Config/configService';
       res.cookie('refreshToken', result.refreshToken);
       const redirectUrl = `${this.configService.get(`FE_BASE_URL`)}/${this.configService.get(`FE_SUCCESS_PATH`)}`;
       res.redirect(redirectUrl);
+    }
+
+    @Get('doc/:id')
+    async getDoc(
+      @Req() req: Request,
+      @Res() res: Response,
+      @Param() param: any,
+      @Query() queryParams: any,
+    ) {
+      const result = await this.googleService.getDoc(req.params.id);
+      const response = formatResponse(result);
+      return res.status(response.statusCode).send(response);
     }
   }

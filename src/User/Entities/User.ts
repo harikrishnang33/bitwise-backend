@@ -1,4 +1,5 @@
 import { AbstractEntity } from 'src/Common/Models/abstractEntity';
+import { GoogleTokenModel } from 'src/Google/Models/GoogleTokenModel';
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -15,4 +16,7 @@ export class User extends AbstractEntity {
     where: `"deleted_at" IS NULL`,
   })
   public email!: string;
+
+  @Column()
+  public googleTokenData: GoogleTokenModel;
 }

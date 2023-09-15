@@ -4,6 +4,12 @@ import { CreateDocDto } from '../Dtos/CreateDoc.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { UserService } from '../../User/Services/UserService';
 import TokenService from '../../Auth/Services/TokenService';
+import { DataSource } from 'typeorm';
+import { plainToClass } from 'class-transformer';
+import { GoogleDoc } from '../Entities/GoogleDoc';
+import { isEmpty } from 'lodash';
+import { User } from 'src/User/Entities/User';
+import { GoogleTokenModel } from '../Models/GoogleTokenModel';
 
 // Load the credentials JSON file you downloaded
 const credentials = JSON.parse(
@@ -18,6 +24,7 @@ export class GoogleService {
   constructor(
     private readonly userService: UserService,
     private tokenService: TokenService,
+    private readonly dataSource: DataSource,
   ) {
     // Create an OAuth2 client
     this.oauth2Client = new google.auth.OAuth2({
@@ -66,10 +73,12 @@ export class GoogleService {
 
     if (!user) {
       this.logger.log(`User with email: ${userInfo.email} doesn't exist`);
-      user = await this.userService.create({
+      const userEntity = plainToClass(User, {
         email: userInfo.email,
         name: userInfo.email,
-      });
+        googleTokenData: tokens as GoogleTokenModel, 
+      })
+      user = await this.userService.create(userEntity);
     }
 
     return this.tokenService.generateAccessAndRefreshTokens(user.id);
@@ -92,6 +101,24 @@ export class GoogleService {
         title: input.name,
       },
     });
+
+    if (result?.data?.documentId) {
+      const docEntity = plainToClass(GoogleDoc, {
+        docId: result.data.documentId,
+      });
+      await this.dataSource.getRepository(GoogleDoc).save(docEntity);
+    }
     return result;
+  }
+
+  public async getDoc(docId: string) {
+    const doc = await this.dataSource.getRepository(GoogleDoc)
+      .createQueryBuilder()
+      .where({ docId })
+      .getOne();
+    if (isEmpty(doc)) {
+      throw new Error('Doc does not exist');
+    }
+    return doc;
   }
 }
