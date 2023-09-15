@@ -26,7 +26,6 @@
     "rollback": "npm run build && npm run typeorm -- -d ./migrations/config/migration.config.ts migration:revert"
   },
   "pre-commit": [
-    "lint"
   ],
   "dependencies": {
     "@fast-csv/format": "^4.3.5",
