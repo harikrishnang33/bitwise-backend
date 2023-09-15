@@ -13,6 +13,7 @@ import { Ticket } from '../../Ticket/Entities/Ticket';
 import { LinkedNode } from '../../LinkedNodes/Entities/LinkedNode';
 import { LinkedNodeType } from '../../LinkedNodes/Enums/LinkedNodeType';
 import { WorkspaceUsersService } from './WorkspaceUsersService';
+import { WorkspaceUsers } from '../Entities/WorkspaceUsers';
 
 @Injectable()
 export class WorkspaceService {
@@ -61,28 +62,15 @@ export class WorkspaceService {
     this.workspaceUsersService.update(workspaceId, emails);
   }
 
-  async getAllWorkspace() {
-    const workspaces = await this.dataSource
-      .getRepository(Workspace)
-      .findAndCount({
-        where: { deletedAt: null },
-        relations: ['admin'],
-        order: { createdAt: 'DESC' },
-      });
+  async getAllWorkspace(user: User) {
+    const queryBuilder = this.dataSource.getRepository(WorkspaceUsers).createQueryBuilder('WorkspaceUsers')
+      .where('WorkspaceUsers.deletedAt IS NULL')
+      .andWhere(`WorkspaceUsers.userId = :userId`, {userId:user.id})
+      .leftJoinAndSelect('WorkspaceUsers.workspace', 'workspace')
+      .leftJoinAndSelect('workspace.workspaceUsers', 'workspaceUsers')
+      .orderBy('workspace.createdAt', 'DESC');
 
-    const workspaceModel = await Promise.all(
-      workspaces[0].map(async (workspace) => {
-        const users = await this.workspaceUsersService.workspaceUsers(
-          workspace.id,
-        );
-        return {
-          workspace,
-          users,
-        };
-      }),
-    );
-
-    return workspaceModel;
+    return queryBuilder.getManyAndCount();
   }
 
   async getAllByWorkspaceId(workspaceId: string) {
