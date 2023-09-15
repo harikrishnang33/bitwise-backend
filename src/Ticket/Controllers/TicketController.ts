@@ -43,7 +43,7 @@ export class TicketController {
     return res.status(response.statusCode).send(response);
   }
 
-  @Get('/:ticketId')
+  @Get('/id/:ticketId')
   async get(
     @Res() res: Response,
     @Param('ticketId', ParseUUIDPipe) ticketId: string,
