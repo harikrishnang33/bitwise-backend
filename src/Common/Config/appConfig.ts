@@ -14,4 +14,9 @@ export const configuration = {
     port: getNumericValue('DB_PORT'),
     logging: true,
   },
+  JWT_SECRET: getEnvValue('JWT_SECRET'),
+  JWT_TOKEN_EXP_TIME: getEnvValue('JWT_TOKEN_EXP_TIME'),
+  JWT_REFRESH_TOKEN_EXP_TIME: getEnvValue('JWT_REFRESH_TOKEN_EXP_TIME'),
+  FE_BASE_URL: getEnvValue('FE_BASE_URL'),
+  FE_SUCCESS_PATH: getEnvValue('FE_SUCCESS_PATH'),
 };
