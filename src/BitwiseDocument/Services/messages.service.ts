@@ -4,16 +4,17 @@ import { UpdateMessageDto } from '../dto/update-message.dto';
 import { Message } from '../Entities/message.entity';
 import { DataSource, DeepPartial } from 'typeorm';
 import { v4 } from 'uuid';
+import { User } from '../../User/Entities/User';
 
 @Injectable()
 export class MessagesService {
   constructor(private readonly dataSource: DataSource) {}
 
-  async create(createDto: CreateMessageDto) {
+  async create(createDto: CreateMessageDto, user: User) {
     const document: DeepPartial<Message> = {
       id: v4(),
       workspaceId: createDto.workspaceId,
-      ownerId: createDto.ownerId,
+      ownerId: user.id,
     };
     return this.dataSource.getRepository(Message).save(document);
   }
