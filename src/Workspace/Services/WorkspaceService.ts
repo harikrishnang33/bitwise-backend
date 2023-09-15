@@ -59,7 +59,7 @@ export class WorkspaceService {
   }
 
   async updateWorkspace(workspaceId: string, emails: string[]) {
-    this.workspaceUsersService.update(workspaceId, emails);
+    return this.workspaceUsersService.update(workspaceId, emails);
   }
 
   async getAllWorkspace(user: User) {
