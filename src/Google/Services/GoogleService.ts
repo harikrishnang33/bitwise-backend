@@ -143,6 +143,7 @@ export class GoogleService {
       const docEntity = plainToClass(GoogleDoc, {
         googleId: result.data.documentId,
         workspaceId: input.workspaceId,
+        name: input.name,
       });
       await this.dataSource.getRepository(GoogleDoc).save(docEntity);
     }
