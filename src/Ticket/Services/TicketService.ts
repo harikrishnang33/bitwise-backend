@@ -11,11 +11,11 @@ export class TicketService {
 
   constructor(private readonly dataSource: DataSource) {}
 
-  async createTicket(input: CreateTicketDto): Promise<Ticket> {
+  async createTicket(input: CreateTicketDto, userId: string): Promise<Ticket> {
     const ticket: DeepPartial<Ticket> = {
       id: v4(),
       title: input.title,
-      createdById: input.createdBy,
+      createdById: userId,
       status: TicketStatus.OPEN,
       description: input.description,
       workspaceId: input.workspaceId,

@@ -7,20 +7,31 @@ import {
   Patch,
   Post,
   Res,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { TicketService } from '../Services/TicketService';
 import { CreateTicketDto } from '../Dto/CreateTicket.dto';
 import { formatResponse } from 'src/Common/Utils/formatResponse';
 import { Response } from 'express';
 import { UpdateTicketStatusDto } from '../Dto/UpdateTicketStatus.dto';
+import { AuthGuard } from 'src/Auth/Guards/AuthGuard';
 
 @Controller('ticket')
 export class TicketController {
   constructor(private readonly ticketService: TicketService) {}
 
   @Post('/')
-  async create(@Res() res: Response, @Body() input: CreateTicketDto) {
-    const result = await this.ticketService.createTicket(input);
+  @UseGuards(AuthGuard)
+  async create(
+    @Res() res: Response,
+    @Body() input: CreateTicketDto,
+    @Req() request: any,
+  ) {
+    const result = await this.ticketService.createTicket(
+      input,
+      request.user.id,
+    );
     const response = formatResponse(result, 'Ticket created successfully');
     return res.status(response.statusCode).send(response);
   }

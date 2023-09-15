@@ -16,7 +16,7 @@ export class WorkspaceController {
   ) {
     const result = await this.workspaceService.create(
       workspaceInput,
-      request.user,
+      request.user.id,
     );
     return formatResponse(result, 'Workspace created successfully');
   }
