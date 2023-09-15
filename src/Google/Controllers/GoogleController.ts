@@ -16,10 +16,8 @@ import { ConfigService } from '../../Common/Config/configService';
 
 @Controller('google')
 export class GoogleController {
-  constructor(
-    private readonly googleService: GoogleService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly googleService: GoogleService,
+    private readonly configService: ConfigService) {}
 
   @Post('create')
   async create(
@@ -45,11 +43,12 @@ export class GoogleController {
   @Get('authenticate')
   async authenticate(
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
     @Query() queryParams: any,
   ) {
     const authCode = queryParams.code;
     const result = await this.googleService.authenticate(authCode);
+    const response = formatResponse(result, 'Authenticated successfully');
     res.cookie('accessToken', result.accessToken);
     res.cookie('refreshToken', result.refreshToken);
     const redirectUrl = `${this.configService.get(
