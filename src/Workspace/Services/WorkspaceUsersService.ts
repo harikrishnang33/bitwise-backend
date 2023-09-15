@@ -62,8 +62,9 @@ export class WorkspaceUsersService {
     );
 
     await Promise.all(
-      emailsToInsert.map((email) => {
-        this.userService.create({ email });
+      emailsToInsert.map(async (email) => {
+        const user = await this.userService.create({ email });
+        itemsToAdd.push(user.id);
       }),
     );
 
