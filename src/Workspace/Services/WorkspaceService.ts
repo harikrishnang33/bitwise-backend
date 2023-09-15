@@ -34,12 +34,10 @@ export class WorkspaceService {
   }
 
   async getAllWorkspace() {
-    return this.dataSource
-      .getRepository(Workspace)
-      .findAndCount({
-        where: { deletedAt: null },
-        relations: ['admin'],
-        order: { createdAt: 'DESC' },
-      });
+    return this.dataSource.getRepository(Workspace).findAndCount({
+      where: { deletedAt: null },
+      relations: ['admin'],
+      order: { createdAt: 'DESC' },
+    });
   }
 }

@@ -7,10 +7,10 @@ export class Message extends AbstractEntity {
   public id!: string;
 
   @Column({ nullable: true })
-  public message: string;
-
-  @Column({ nullable: true })
   public name: string;
+
+  @Column({ nullable: true, type: 'text' })
+  public message: string;
 
   @Column({ nullable: false })
   public workspaceId: string;

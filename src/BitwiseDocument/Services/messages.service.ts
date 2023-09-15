@@ -5,43 +5,86 @@ import { Message } from '../Entities/message.entity';
 import { DataSource, DeepPartial } from 'typeorm';
 import { v4 } from 'uuid';
 import { User } from '../../User/Entities/User';
+import { isEmpty } from 'lodash';
+import { LinkedNodeService } from 'src/LinkedNodes/Services/LinkedNodeService';
+import { LinkedNode } from 'src/LinkedNodes/Entities/LinkedNode';
+import { DocumentResponseModel } from '../Models/DocumentResponseModel';
 
 @Injectable()
 export class MessagesService {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly linkedNodeService: LinkedNodeService,
+  ) {}
 
   async create(createDto: CreateMessageDto, user: User) {
     const document: DeepPartial<Message> = {
       id: v4(),
+      name: createDto.name,
       workspaceId: createDto.workspaceId,
       ownerId: user.id,
     };
     return this.dataSource.getRepository(Message).save(document);
   }
 
-  findAllByWorkspaceId(workspaceId: string) {
+  async findAllByWorkspaceId(workspaceId: string) {
     return this.dataSource
       .getRepository(Message)
-      .findBy({ workspaceId, deletedAt: null });
+      .find({ where: { workspaceId, deletedAt: null } });
   }
 
-  findOneById(id: string) {
-    return this.dataSource.getRepository(Message).findOneBy({ id });
+  async findOneById(id: string) {
+    const document = await this.dataSource
+      .getRepository(Message)
+      .findOneBy({ id });
+    const linkedNodes = await this.linkedNodeService.getLinkedNodes(
+      document.id,
+      document.workspaceId,
+    );
+    return this.mapLinkedNodesToDocument(document, linkedNodes);
   }
 
   async upsert(id: string, updateMessageDto: UpdateMessageDto) {
     const document: DeepPartial<Message> = {
       id: id ? id : v4(),
-      message: updateMessageDto.message ? updateMessageDto.message : null,
+      message: updateMessageDto.message,
     };
-    return this.dataSource.getRepository(Message).save(document);
+    await this.dataSource.getRepository(Message).save(document);
+    const savedDocument = await this.dataSource
+      .getRepository(Message)
+      .findOneBy({ id });
+    await this.linkedNodeService.softDelete(id);
+    let linkedNodes: LinkedNode[] = [];
+    if (!isEmpty(updateMessageDto.linkedNodes)) {
+      linkedNodes = await this.linkedNodeService.insert(
+        id,
+        savedDocument.workspaceId,
+        updateMessageDto.linkedNodes,
+      );
+    }
+
+    return this.mapLinkedNodesToDocument(savedDocument, linkedNodes);
   }
 
-  softDeleteById(id: string) {
-    const document: DeepPartial<Message> = {
-      id,
-      deletedAt: new Date(),
+  async softDeleteById(id: string) {
+    await this.dataSource.getRepository(Message).softDelete({ id });
+    await this.linkedNodeService.softDelete(id);
+  }
+
+  mapLinkedNodesToDocument(document: Message, linkedNodes: LinkedNode[]) {
+    const linkedNodeModels = linkedNodes?.map((linkedNode) => ({
+      id: linkedNode.destinationId,
+      type: linkedNode.type,
+    }));
+
+    const resultDoc: DocumentResponseModel = {
+      id: document.id,
+      name: document.name,
+      message: document.message,
+      workspaceId: document.workspaceId,
+      ownerId: document.ownerId,
+      linkedNodes: linkedNodeModels,
     };
-    return this.dataSource.getRepository(Message).save(document);
+    return resultDoc;
   }
 }

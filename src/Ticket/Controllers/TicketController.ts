@@ -23,7 +23,11 @@ export class TicketController {
   constructor(private readonly ticketService: TicketService) {}
 
   @Post('/')
-  async create(@Res() res: Response, @Req() req, @Body() input: CreateTicketDto) {
+  async create(
+    @Res() res: Response,
+    @Req() req,
+    @Body() input: CreateTicketDto,
+  ) {
     const result = await this.ticketService.createTicket(input, req.user);
     const response = formatResponse(result, 'Ticket created successfully');
     return res.status(response.statusCode).send(response);
