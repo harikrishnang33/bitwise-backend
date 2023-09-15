@@ -41,7 +41,7 @@ export class MessagesGateway {
     const message = await this.messagesService.findOneById(
       findMessageDtoObject.id,
     );
-    client.broadcast.emit('messageUpdated', JSON.stringify(message));
+    client.emit('messageUpdated', JSON.stringify(message));
     return message;
   }
 }
