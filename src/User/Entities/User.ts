@@ -1,6 +1,6 @@
 import { AbstractEntity } from 'src/Common/Models/abstractEntity';
-import { GoogleTokenModel } from 'src/Google/Models/GoogleTokenModel';
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Credentials } from 'google-auth-library';
 
 @Entity()
 export class User extends AbstractEntity {
@@ -18,5 +18,5 @@ export class User extends AbstractEntity {
   public email!: string;
 
   @Column({type: 'json'})
-  public googleTokenData: GoogleTokenModel;
+  public googleTokenData: Credentials;
 }

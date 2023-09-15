@@ -62,7 +62,7 @@ import { ConfigService } from '../../Common/Config/configService';
       @Req() req: Request,
       @Res() res: Response,
     ) {
-      const result = await this.googleService.getDoc(req.params.id);
+      const result = await this.googleService.getDocByGoogleId(req.params.id);
       const response = formatResponse(result);
       return res.status(response.statusCode).send(response);
     }

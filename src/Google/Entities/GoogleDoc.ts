@@ -7,6 +7,6 @@ export class GoogleDoc extends AbstractEntity {
   public id!: string;
 
   @Column({ nullable: true })
-  public docId: string;
+  public googleId: string;
 
 }

@@ -30,4 +30,11 @@ export class DocumentsController {
     );
     return response;
   }
+
+  @Get('temp')
+  async temp() {
+    const result = await this.messagesService.temp();
+    const response = formatResponse(result, 'Documents fetched successfully');
+    return response;
+  }
 }
