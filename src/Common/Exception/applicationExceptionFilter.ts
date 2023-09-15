@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
 import { Request, Response } from 'express';
+import BitwiseBaseError from './BitwiseBaseError';
 
 @Catch()
 export class ApplicationExceptionFilter implements ExceptionFilter {
@@ -40,10 +41,14 @@ export class ApplicationExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const { method, path } = request;
 
-    const statusCode =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+    let statusCode: number;
+    if (exception instanceof HttpException) {
+      statusCode = exception.getStatus();
+    } else if (exception instanceof BitwiseBaseError) {
+      statusCode = exception.statusCode;
+    } else {
+      statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+    }
 
     const message =
       exception instanceof HttpException || exception instanceof Error
