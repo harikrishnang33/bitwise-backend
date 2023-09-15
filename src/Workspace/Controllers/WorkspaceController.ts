@@ -32,7 +32,7 @@ export class WorkspaceController {
   }
 
   @Patch('/:workspaceId')
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   async update(
     @Body() workspaceInput: UpdateWorkspaceDto,
     @Param('workspaceId') workspaceId: string,
@@ -42,11 +42,11 @@ export class WorkspaceController {
       workspaceId,
       workspaceInput.emails,
     );
-    return formatResponse(result, 'Workspace created successfully');
+    return formatResponse(result, 'Workspace updated successfully');
   }
 
   @Get()
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   async getAll(@Req() request: any) {
     const result = await this.workspaceService.getAllWorkspace();
     return formatResponse(result, 'Workspaces fetched successfully');

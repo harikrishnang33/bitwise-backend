@@ -1,13 +1,16 @@
 import { User } from 'src/User/Entities/User';
 import { AbstractEntity } from '../../Common/Models/abstractEntity';
-import { PrimaryColumn, Entity, ManyToOne } from 'typeorm';
+import { Entity, ManyToOne, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
 export class WorkspaceUsers extends AbstractEntity {
-  @PrimaryColumn({ nullable: false })
+  @PrimaryGeneratedColumn('uuid')
+  public id: string;
+
+  @Column('uuid')
   public userId: string;
 
-  @PrimaryColumn({ nullable: false })
+  @Column('uuid')
   public workspaceId: string;
 
   @ManyToOne(() => User, (user) => user.workspaceUsers, {

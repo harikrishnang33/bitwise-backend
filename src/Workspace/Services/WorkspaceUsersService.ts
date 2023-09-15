@@ -32,11 +32,7 @@ export class WorkspaceUsersService {
   async createWorkspaceUsers(workspaceId: string, userIds: string[]) {
     const repo = this.dataSource.getRepository(WorkspaceUsers);
     for (const userId of userIds) {
-      const workspaceUser: DeepPartial<WorkspaceUsers> = {
-        workspaceId,
-        userId,
-      };
-      await repo.save(workspaceUser);
+      await repo.save({ userId, workspaceId });
     }
   }
 
