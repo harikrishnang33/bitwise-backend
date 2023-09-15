@@ -1,5 +1,12 @@
 import { AbstractEntity } from 'src/Common/Models/abstractEntity';
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { WorkspaceUsers } from 'src/Workspace/Entities/WorkspaceUsers';
+import {
+  Column,
+  Entity,
+  Index,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class User extends AbstractEntity {
@@ -15,4 +22,9 @@ export class User extends AbstractEntity {
     where: `"deleted_at" IS NULL`,
   })
   public email!: string;
+
+  @OneToMany(() => WorkspaceUsers, (workspaceUsers) => workspaceUsers.user, {
+    createForeignKeyConstraints: false,
+  })
+  public workspaceUsers!: WorkspaceUsers[];
 }
