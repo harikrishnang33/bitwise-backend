@@ -54,6 +54,6 @@ export class LinkedNodeService {
   async softDelete(sourceId: string) {
     await this.dataSource
       .getRepository(LinkedNode)
-      .softDelete({ id: sourceId });
+      .softDelete({ sourceId });
   }
 }

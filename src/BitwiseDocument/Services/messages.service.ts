@@ -13,6 +13,8 @@ import { GoogleService } from 'src/Google/Services/GoogleService';
 const HTMLtoDOCX = require('html-to-docx');
 // import U8 from 'uint8-encoding';
 import { plainToClass } from 'class-transformer';
+import { GoogleDoc } from 'src/Google/Entities/GoogleDoc';
+import { Ticket } from 'src/Ticket/Entities/Ticket';
 
 @Injectable()
 export class MessagesService {
@@ -46,17 +48,45 @@ export class MessagesService {
       document.workspaceId,
       document.id,
     );
-    const linkedDestinationDocuments = await this.dataSource
+    const linkedDestinationMessages = await this.dataSource
       .getRepository(Message)
       .createQueryBuilder(Message.name)
       .whereInIds(
         linkedNodes.map((linkedNode: LinkedNode) => linkedNode.destinationId),
       )
       .getMany();
+
+    const linkedDestinationGDoc = await this.dataSource
+    .getRepository(GoogleDoc)
+    .createQueryBuilder(GoogleDoc.name)
+    .whereInIds(
+      linkedNodes.map((linkedNode: LinkedNode) => linkedNode.destinationId),
+    )
+    .getMany();
+    const linkedDestinationTicket = await this.dataSource
+      .getRepository(Ticket)
+      .createQueryBuilder(Ticket.name)
+      .whereInIds(
+        linkedNodes.map((linkedNode: LinkedNode) => linkedNode.destinationId),
+      )
+      .getMany();
+
+    const linkedDestinationDocumentsMap: Map<string, string> = new Map();
+    linkedDestinationMessages?.forEach((document: Message) => {
+      linkedDestinationDocumentsMap.set(document.id, document.name);
+    });
+
+    linkedDestinationGDoc?.forEach((document: GoogleDoc) => {
+      linkedDestinationDocumentsMap.set(document.id, document.name);
+    });
+
+    linkedDestinationTicket?.forEach((document: Ticket) => {
+      linkedDestinationDocumentsMap.set(document.id, document.title);
+    });
     return this.mapLinkedNodesToDocument(
       document,
       linkedNodes,
-      linkedDestinationDocuments,
+      linkedDestinationDocumentsMap,
     );
   }
 
@@ -86,6 +116,7 @@ export class MessagesService {
       .getRepository(Message)
       .findOne({ where: { id } });
     await this.linkedNodeService.softDelete(id);
+    console.log(updateMessageDto.linkedNodes);
     let linkedNodes: LinkedNode[] = [];
     if (!isEmpty(updateMessageDto.linkedNodes)) {
       linkedNodes = await this.linkedNodeService.insert(
@@ -95,17 +126,45 @@ export class MessagesService {
       );
     }
 
-    const linkedDestinationDocuments = await this.dataSource
+    const linkedDestinationMessages = await this.dataSource
       .getRepository(Message)
       .createQueryBuilder(Message.name)
       .whereInIds(
         linkedNodes.map((linkedNode: LinkedNode) => linkedNode.destinationId),
       )
       .getMany();
+
+    const linkedDestinationGDoc = await this.dataSource
+    .getRepository(GoogleDoc)
+    .createQueryBuilder(GoogleDoc.name)
+    .whereInIds(
+      linkedNodes.map((linkedNode: LinkedNode) => linkedNode.destinationId),
+    )
+    .getMany();
+    const linkedDestinationTicket = await this.dataSource
+      .getRepository(Ticket)
+      .createQueryBuilder(Ticket.name)
+      .whereInIds(
+        linkedNodes.map((linkedNode: LinkedNode) => linkedNode.destinationId),
+      )
+      .getMany();
+
+    const linkedDestinationDocumentsMap: Map<string, string> = new Map();
+    linkedDestinationMessages?.forEach((document: Message) => {
+      linkedDestinationDocumentsMap.set(document.id, document.name);
+    });
+
+    linkedDestinationGDoc?.forEach((document: GoogleDoc) => {
+      linkedDestinationDocumentsMap.set(document.id, document.name);
+    });
+
+    linkedDestinationTicket?.forEach((document: Ticket) => {
+      linkedDestinationDocumentsMap.set(document.id, document.title);
+    });
     return this.mapLinkedNodesToDocument(
       savedDocument,
       linkedNodes,
-      linkedDestinationDocuments,
+      linkedDestinationDocumentsMap,
     );
   }
 
@@ -117,15 +176,11 @@ export class MessagesService {
   mapLinkedNodesToDocument(
     document: Message,
     linkedNodes: LinkedNode[],
-    linkedDestinationDocuments: Message[],
+    linkedDestinationDocumentsMap: Map<string, string> 
   ) {
-    const linkedDestinationDocumentsMap: Map<string, Message> = new Map();
-    linkedDestinationDocuments?.forEach((document: Message) => {
-      linkedDestinationDocumentsMap.set(document.id, document);
-    });
     const linkedNodeModels = linkedNodes?.map((linkedNode) => ({
       id: linkedNode.destinationId,
-      name: linkedDestinationDocumentsMap.get(linkedNode.destinationId).name,
+      name: linkedDestinationDocumentsMap.get(linkedNode.destinationId),
       type: linkedNode.type,
     }));
 
